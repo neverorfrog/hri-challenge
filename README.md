@@ -1,5 +1,4 @@
-$$\color{Orange}{\texttt{\huge RoboCup Challenge}}$$
-$$\color{Green}{\texttt{\LARGE Luigi}}$$
+$$\color{Orange}{\texttt{\huge Luigi RoboCup Challenge}}$$
 
 ![Luigi](images/luigi.png)
 

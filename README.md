@@ -2,6 +2,8 @@ $$\color{Orange}{\texttt{\huge Luigi RoboCup Challenge}}$$
 
 ![Luigi](images/luigi.png)
 
+# Motion
+
 ## Robot motion
 
 ### High level control
@@ -37,7 +39,9 @@ The robot should always look forward or at the ball unless the human provides co
 When the command is not provided anymore, the robot head should returns to the original position (look forward/look at the ball)
 The commands can be provided using the arrows keys of the keyboard or the joypad and moving the head directly to a predefined angle (in pan/tilt), or moving incrementally it (e.g. 5° at time).
 
-## Interface
+
+
+# Interface
 On the screen must be present
 - a 2D field showing:
     - the controlled robot
@@ -66,7 +70,8 @@ On the screen must be present
 - the current time of the game and the points obtained so far (estimated?)
 - The FOV of the robot displayed as a cone on the 2D field
 
-## Normal vs Forced State
+
+# Normal vs Forced State
 - **Normal state**: once an action is triggered the robot should perform that action until the completition. 
 - **Forced state**: if the operator enters in _forced_ state, he can overwrite the current active action with a new action (e.g. the robot is doing Go to ball and Pass and the operator can force Go to ball and Dribble).
 
@@ -78,7 +83,7 @@ TODO: define a key or a combination of keys to enter in the forced state. Some e
 - ...
 
 
-## Proposals
+# Proposals
 - Could be useful to plot the next X expected positions of the teammate in order to plan the passage in advance.
 - Indentify which opponent robot is controlled and which is autonomous, in order to apply tactics. Idea: douring the attacking phase track the robot that kick to the own goal, while in the defense phase track the robot that is the goalkeeper.
 

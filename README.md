@@ -1,6 +1,6 @@
 $$\color{Orange}{\texttt{\huge Luigi RoboCup Challenge}}$$
 
-![Luigi](images/luigi.png)
+![Luigi](docs/images/luigi.png)
 
 # Motion
 

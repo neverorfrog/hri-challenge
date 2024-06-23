@@ -135,7 +135,7 @@ var backend_keepalive_send_timeout;
 function requestKeepaliveToBackend() {
     
   //console.log("[FRONTEND; KEEPALIVE] Requesting keepalive to backend")
-  send_registration_message_to_backend()
+  // send_registration_message_to_backend()
 
   //Set a timeout to be cleared in case a keepalive is received
   backend_keepalive_receive_timeout = setTimeout(function () {
@@ -255,7 +255,7 @@ webSocket.on('request', function(request) {
         {
           try{
             //console.log(message_content)
-            write_socket.send(generateHeader() + message_content, 65300, LOCAL_BACKEND_IP, (err) => {});
+            // write_socket.send(generateHeader() + message_content, 65300, LOCAL_BACKEND_IP, (err) => {});
           } catch {}
           //console.log(obstaclesPositions)
           //console.log("[FRONTEND; KEEPALIVE] Received keepalive from client (ID: "+receivedClientID+"). Sending response.")

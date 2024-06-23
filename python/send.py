@@ -44,6 +44,7 @@ def send_message():
             except UnicodeDecodeError:
                 print(f"Received non-UTF-8 message from JavaScript: {data} from {addr}")
             encoded_data = struct.pack(config.format, command, strategy, x_pos, y_pos)
+            print(f"Sending message to C++: {encoded_data}")
             send_sock_cpp.sendto(encoded_data, (config.UDP_IP_CPP, config.UDP_SEND_PORT_CPP))
         except Exception as e:
             print(f"Error in send_message: {e}")
@@ -53,7 +54,6 @@ if __name__ == "__main__":
     try:        
         print("Starting send thread")
         send_thread = threading.Thread(target=send_message)
-        
         send_thread.start()
         send_thread.join()
     except KeyboardInterrupt:

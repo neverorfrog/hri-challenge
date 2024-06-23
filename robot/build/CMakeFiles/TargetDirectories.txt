@@ -1,3 +1,0 @@
-/home/neverorfrog/code/interfaccia-hri/robot/build/CMakeFiles/main.dir
-/home/neverorfrog/code/interfaccia-hri/robot/build/CMakeFiles/edit_cache.dir
-/home/neverorfrog/code/interfaccia-hri/robot/build/CMakeFiles/rebuild_cache.dir

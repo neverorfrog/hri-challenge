@@ -18,7 +18,7 @@ receive_sock_cpp.bind((config.UDP_IP_CPP, config.UDP_RECEIVE_PORT_CPP))
 # Create socket for sending messages to JavaScript
 send_sock_js = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-def receive_message():
+def update():
     """
     RECEIVES messages from C++ and sends them to a JavaScript server.
 
@@ -59,11 +59,9 @@ def receive_message():
             
 if __name__ == "__main__":
     try:        
-        print("Starting receive thread")
-        receive_thread = threading.Thread(target=receive_message)
-        
-        receive_thread.start()
-        receive_thread.join()
+        thread = threading.Thread(target=update)
+        thread.start()
+        thread.join()
     except KeyboardInterrupt:
         print("Manual program interruption")
     except Exception as e:

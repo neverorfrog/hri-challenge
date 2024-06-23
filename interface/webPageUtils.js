@@ -47,6 +47,23 @@ function toggleTaskButtonSelection(button) {
     }
 }
 
+function toggleStrategyButtonSelection(button) {
+
+    var canvas = document.getElementById("field-canvas");
+    if(canvas.currentlySelectedStrategyButton == button)
+    {
+        
+        canvas.currentlySelectedStrategyButton = undefined;
+        console.log("Strategy button "+button.id+" unselected")
+    }
+    else 
+    {
+        canvas.currentlySelectedStrategyButton = button;
+        
+        console.log("Strategy button "+button.id+" selected with mode "+document.getElementById("field-canvas").currentlySelectedTaskButton.selectionMode);
+    }
+}
+
 function toggleTaskButtonSelection(button) {
 
     var canvas = document.getElementById("field-canvas");

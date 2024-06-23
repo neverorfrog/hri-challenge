@@ -9,8 +9,7 @@ if(typeof console === "undefined"){
 var CONTROLLED_ROBOT = 4
 var AUTONOMOUS_ROBOT = 3
 
-var clickCountTask = 0
-var strategySelected = "Strategy 0"
+var strategySelected = 0
 
 var tempoRimanente = undefined
 var canvas;
@@ -83,12 +82,6 @@ var obstacleColor = "";
 var goalColor = "";
 var targetPositionColor = "";
 
-var taskColors = [];
-for(var i = 0; i<500; i++)
-{
-    taskColors[i] = Utils.generateRandomColor();
-}
-
 var canvasTextColor = "#FFFFFF";
 var canvasContainerBackgroundColor = "#DDDDEE";
 var canvasBackgroundColor = "#00BB00";
@@ -98,10 +91,13 @@ var robotNumbersToPositions = new Map();
 var robotTeammatesNumbersToPositions = new Map();
 var ballPosition = [];
 var obstaclesPositions = [];
-var taskTypeToTaskLabel = new Map();
+
+//Task received and completed
 var lastReceivedTaskID = -1;
 var lastReceivedStrategyID = -1;
 var lastCompletedTaskID = -1;
+
+//Task list
 var currentTaskList = [];
 var currentTaskPreviews = [];
 
@@ -151,36 +147,6 @@ function drawSemiCircle(ctx, centerX, centerY, radius, fillColor = undefined, li
     ctx.lineWidth = lineWidth;
     ctx.strokeStyle = lineColor;
     ctx.stroke();
-}
-
-function drawSemiCircle(ctx, centerX, centerY, radius, fillColor = undefined, lineColor = "#000000", lineWidth = 5, withRespectToCenter = undefined, startAngle = 0, endAngle = Math.PI, rotationAngle = 0)
-{
-    if(withRespectToCenter != undefined)
-    {
-        centerX = centerX + withRespectToCenter[0];
-        centerY = centerY + withRespectToCenter[1];
-    }
-
-    console.log(centerX);
-    console.log(centerY);
-
-    ctx.save(); 
-    ctx.translate(centerX, centerY); 
-    ctx.rotate(rotationAngle); 
-
-    ctx.beginPath();
-    ctx.arc(0, 0, radius, startAngle, endAngle, false);
-    
-    if(fillColor == undefined)
-        fillColor = canvasBackgroundColor;
-    ctx.fillStyle = fillColor;
-    ctx.fill();
-
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = lineColor;
-    ctx.stroke();
-
-    ctx.restore(); 
 }
 
 function drawTextLabel(ctx, xPos, yPos, text, color, size, withRespectToCenter = undefined)
@@ -281,32 +247,32 @@ function drawField(canvas)
     drawLine(ctx, -FieldDimensions.X_POS_SIDE_LINE, -FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.X_POS_SIDE_LINE, FieldDimensions.Y_POS_SIDE_LINE, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
     drawLine(ctx, FieldDimensions.X_POS_SIDE_LINE, -FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.X_POS_SIDE_LINE, FieldDimensions.Y_POS_SIDE_LINE, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
-        drawLine(ctx, FieldDimensions.PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.PENALTY_AREA_HEIGHT, -FieldDimensions.PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawLine(ctx, FieldDimensions.PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.PENALTY_AREA_HEIGHT, -FieldDimensions.PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
-        drawLine(ctx, -FieldDimensions.PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
-        drawLine(ctx, FieldDimensions.PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions. PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
-        
-        drawLine(ctx, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawLine(ctx, -FieldDimensions.PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawLine(ctx, FieldDimensions.PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions. PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    
+    drawLine(ctx, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
-        drawLine(ctx, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
-        drawLine(ctx, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
-
-        
-
+    drawLine(ctx, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawLine(ctx, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
     
-        drawLine(ctx, FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.PENALTY_AREA_HEIGHT, -FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
-        drawLine(ctx, -FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
-        drawLine(ctx, FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
-        drawLine(ctx, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
-        drawLine(ctx, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
-        drawLine(ctx, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawLine(ctx, FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.PENALTY_AREA_HEIGHT, -FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
-        drawCircle(ctx, 0, -FieldDimensions.PENALTY_AREA_HEIGHT/2-550, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
-    
+    drawLine(ctx, -FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawLine(ctx, FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+
+    drawLine(ctx, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+
+    drawLine(ctx, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawLine(ctx, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+
+    drawCircle(ctx, 0, -FieldDimensions.PENALTY_AREA_HEIGHT/2-550, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+
     drawLine(ctx, -FieldDimensions.X_POS_PENALTY_CROSS, FieldDimensions.PENALTY_CROSS_SIZE/2, -FieldDimensions.X_POS_PENALTY_CROSS, -FieldDimensions.PENALTY_CROSS_SIZE/2, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
     drawLine(ctx, -FieldDimensions.X_POS_PENALTY_CROSS - FieldDimensions.PENALTY_CROSS_SIZE/2, 0, -FieldDimensions.X_POS_PENALTY_CROSS + FieldDimensions.PENALTY_CROSS_SIZE/2, 0, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
@@ -330,7 +296,6 @@ function drawField(canvas)
     drawCircle(ctx, FieldDimensions.GOAL_POST_WIDTH/2 + FieldDimensions.GOAL_POST_RADIUS/2,     FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
     
 }
-
 
 function scaleFieldPositionToCanvas(canvas, xFieldPos, yFieldPos)
 {
@@ -366,49 +331,6 @@ function viewportMouseToCanvasCoordinates(canvas, xPos, yPos)
     var scaleX = canvas.width / boundingRect.width;    
     var scaleY = canvas.height / boundingRect.height;  
     return [(xPos - boundingRect.left) * scaleX, (yPos - boundingRect.top) * scaleY];
-}
-
-function drawTargetOnField(canvas, xPos, yPos, targetColor)
-{
-    var ctx = canvas.getContext('2d');
-    
-    drawCircle(ctx, xPos, yPos, FieldDimensions.TARGET_RADIUS, canvasBackgroundColor, targetColor, 
-               mapValueToCurrentCanvas(mapValueToCurrentField(40)) );
-    drawLine(ctx, xPos, yPos+FieldDimensions.TARGET_RADIUS*3/2, xPos, yPos-FieldDimensions.TARGET_RADIUS*3/2, targetColor,
-             mapValueToCurrentCanvas(mapValueToCurrentField(40)) )
-    drawLine(ctx, xPos+FieldDimensions.TARGET_RADIUS*3/2, yPos, xPos-FieldDimensions.TARGET_RADIUS*3/2, yPos, targetColor, 
-             mapValueToCurrentCanvas(mapValueToCurrentField(40)) )
-}
-
-function drawTargetPreviewOnField(canvas, debugInfo=false, scaledTargetPos = undefined, targetColor = "#FFFFFF")
-{
-    if(!mouseOverCanvas) return
-    var unscaledTarget;
-    var scaledTarget;
-    if(scaledTargetPos == undefined)
-    {
-        unscaledTarget = canvas.unscaledMousePositionOnCanvas;
-        scaledTarget = canvas.scaledMousePositionOnCanvas;    
-    }
-    else
-    {
-        x-special/nautilus-clipboard
-        unscaledTarget = scaleFieldPositionToCanvas(canvas, scaledTargetPos[0], scaledTargetPos[1])
-        scaledTarget = scaledTargetPos;
-    }
-
-    if(debugInfo)
-    {
-        var ctx = canvas.getContext('2d');
-        ctx.fillStyle = canvasTextColor;
-        ctx.font = mapValueToCurrentCanvas(mapValueToCurrentField(180))+"px Arial";
-        ctx.fillText("X: "+scaledTarget[0]+", Y: "+-scaledTarget[1], 
-                    mapValueToCurrentCanvas(mapValueToCurrentField(280)),
-                    mapValueToCurrentCanvas(mapValueToCurrentField(300)) );
-    }
-
-    console.log("Drawing target preview: "+unscaledTarget)
-    drawTargetOnField(canvas, unscaledTarget[0], unscaledTarget[1], targetColor)
 }
 
 function drawRobot(ctx, robotNumber, angle, xPos, yPos, isActiveRobot = false, isActiveTeammateRobot = false)
@@ -454,6 +376,49 @@ function drawBall(ctx)
         [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2])
 };
 
+function drawTargetOnField(canvas, xPos, yPos, targetColor)
+{
+    var ctx = canvas.getContext('2d');
+    
+    drawCircle(ctx, xPos, yPos, FieldDimensions.TARGET_RADIUS, canvasBackgroundColor, targetColor, 
+               mapValueToCurrentCanvas(mapValueToCurrentField(40)) );
+    drawLine(ctx, xPos, yPos+FieldDimensions.TARGET_RADIUS*3/2, xPos, yPos-FieldDimensions.TARGET_RADIUS*3/2, targetColor,
+             mapValueToCurrentCanvas(mapValueToCurrentField(40)) )
+    drawLine(ctx, xPos+FieldDimensions.TARGET_RADIUS*3/2, yPos, xPos-FieldDimensions.TARGET_RADIUS*3/2, yPos, targetColor, 
+             mapValueToCurrentCanvas(mapValueToCurrentField(40)) )
+}
+
+function drawTargetPreviewOnField(canvas, debugInfo=false, scaledTargetPos = undefined, targetColor = "#FFFFFF")
+{
+    if(!mouseOverCanvas) return
+    var unscaledTarget;
+    var scaledTarget;
+    if(scaledTargetPos == undefined)
+    {
+        unscaledTarget = canvas.unscaledMousePositionOnCanvas;
+        scaledTarget = canvas.scaledMousePositionOnCanvas;    
+    }
+    else
+    {
+        x-special/nautilus-clipboard
+        unscaledTarget = scaleFieldPositionToCanvas(canvas, scaledTargetPos[0], scaledTargetPos[1])
+        scaledTarget = scaledTargetPos;
+    }
+
+    if(debugInfo)
+    {
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = canvasTextColor;
+        ctx.font = mapValueToCurrentCanvas(mapValueToCurrentField(180))+"px Arial";
+        ctx.fillText("X: "+scaledTarget[0]+", Y: "+-scaledTarget[1], 
+                    mapValueToCurrentCanvas(mapValueToCurrentField(280)),
+                    mapValueToCurrentCanvas(mapValueToCurrentField(300)) );
+    }
+
+    console.log("Drawing target preview: "+unscaledTarget)
+    drawTargetOnField(canvas, unscaledTarget[0], unscaledTarget[1], targetColor)
+}
+
 function drawObstacles(ctx)
 {
     console.log("START")
@@ -491,78 +456,6 @@ function drawObjects(canvas)
     drawObstacles(ctx)
 }
 
-function drawCurrentTasks(canvas)
-{
-    if(robotNumbersToPositions[CONTROLLED_ROBOT] == undefined) return;
-    var prevWaypoint = scaleFieldPositionToCanvas(canvas, robotNumbersToPositions[CONTROLLED_ROBOT][1], robotNumbersToPositions[CONTROLLED_ROBOT][2]);
-    for(var task of currentTaskList)
-    {
-        switch(task.taskType)
-        {
-            case "GoToPosition":
-            {
-                targetPosition = scaleFieldPositionToCanvas(canvas, task.parameters[0], -task.parameters[1]); 
-                drawTargetOnField(canvas, targetPosition[0], targetPosition[1], taskColors[task.taskID])
-                
-                drawTextLabel(canvas.getContext("2d"), 
-                                targetPosition[0] + FieldDimensions.ROBOT_RADIUS * 2, 
-                                targetPosition[1] - FieldDimensions.ROBOT_RADIUS * 2, "Task "+task.taskID, taskColors[task.taskID], 95,
-                                )
-
-                drawLine(canvas.getContext("2d"), 
-                            prevWaypoint[0],
-                            prevWaypoint[1],
-                            targetPosition[0],
-                            targetPosition[1],
-                            "#0000CC",
-                            20
-                        )
-                prevWaypoint = targetPosition;
-                break;
-            }
-            case "KickBallToPosition":
-            {
-                updateTaskLabel(time);
-                break;
-            }
-            case "CarryBallToPosition":
-            {
-                targetPosition = scaleFieldPositionToCanvas(canvas, task.parameters[0], -task.parameters[1]); 
-                drawTargetOnField(canvas, targetPosition[0], targetPosition[1], taskColors[task.taskID])
-
-                drawArrow(canvas.getContext("2d"), 
-                        Utils.mapValue(ballPosition[0], -CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_WIDTH/2, -CURRENT_CANVAS_FIELD_WIDTH/2, CURRENT_CANVAS_FIELD_WIDTH/2),
-                        Utils.mapValue(ballPosition[1], -CANVAS_FIELD_HEIGHT/2, CANVAS_FIELD_HEIGHT/2, -CURRENT_CANVAS_FIELD_HEIGHT/2, CURRENT_CANVAS_FIELD_HEIGHT/2), 
-                        targetPosition[0] - CANVAS_FIELD_WIDTH/2, 
-                        targetPosition[1] - CANVAS_FIELD_HEIGHT/2, 
-                        "#FF0000", 
-                        mapValueToCurrentCanvas(mapValueToCurrentField(20)), //border width 
-                        mapValueToCurrentCanvas(mapValueToCurrentField(200)), //arrow head length
-                        [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2])
-
-                drawTextLabel(canvas.getContext("2d"), 
-                                targetPosition[0] + FieldDimensions.ROBOT_RADIUS * 2, 
-                                targetPosition[1] - FieldDimensions.ROBOT_RADIUS * 2, "Task "+task.taskID, taskColors[task.taskID], 95,
-                                )
-                break;
-            }
-            case "ScoreGoal":
-            {   
-                drawArrow(canvas.getContext("2d"), 
-                        Utils.mapValue(ballPosition[0], -CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_WIDTH/2, -CURRENT_CANVAS_FIELD_WIDTH/2, CURRENT_CANVAS_FIELD_WIDTH/2),
-                        Utils.mapValue(ballPosition[1], -CANVAS_FIELD_HEIGHT/2, CANVAS_FIELD_HEIGHT/2, -CURRENT_CANVAS_FIELD_HEIGHT/2, CURRENT_CANVAS_FIELD_HEIGHT/2), 
-                        FieldDimensions.X_POS_SIDE_LINE, 
-                        0, 
-                        "#FF0000", 
-                        mapValueToCurrentCanvas(mapValueToCurrentField(20)), //border width 
-                        mapValueToCurrentCanvas(mapValueToCurrentField(50)), //arrow head length
-                        [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2])
-                break;
-            }
-        }
-    }
-}
-
 function drawCanvas()
 {
     var canvas = document.getElementById("field-canvas");
@@ -575,9 +468,6 @@ function drawCanvas()
     //Draw the target for the currently selected task button (if there is one)
     if(canvas.currentlySelectedTaskButton != undefined && canvas.currentlySelectedTaskButton.selectionMode != "noSelection")
         drawTargetPreviewOnField(canvas, true)    
-    
-    //Draw something for each task (a target and or other info)
-    drawCurrentTasks(canvas);
     
     //console.log("drawObjects")
     //Draw the ball, the robot positions and the obstacle positions
@@ -661,7 +551,7 @@ function disableClient(reason)
 
 }
 
-function createTaskAssignmentButton(tab, taskLabel, taskType, selectionMode, isStrategy) {
+function createTaskAssignmentButton(tab, taskLabel, taskType, selectionMode) {
 
     var outerDiv = document.createElement("DIV");
     outerDiv.classList.add("settings-horizontal-container")
@@ -682,6 +572,7 @@ function createTaskAssignmentButton(tab, taskLabel, taskType, selectionMode, isS
     var btn = document.createElement("BUTTON");
     btn.classList.add("settings-horizontal-container")
     btn.innerHTML = taskLabel;
+    btn.taskLabel = taskLabel;
     btn.taskType = taskType;
     btn.selectionMode = selectionMode;
 
@@ -694,18 +585,12 @@ function createTaskAssignmentButton(tab, taskLabel, taskType, selectionMode, isS
             toggleButton(canvas.currentlySelectedTaskButton)
             toggleTaskButtonSelection(canvas.currentlySelectedTaskButton);
         }
-
+        
         if(selectionMode === "noSelection")
         {
-            if(isStrategy) {
-                toggleButton(e.target)
-                strategySelected = taskLabel;
-            }
-            else {
-                toggleButton(e.target)
-                setTimeout(function () {toggleButton(e.target)}, 200)
-                sendNewTask(CONTROLLED_ROBOT, btn.taskType, taskLabel, "noSelection", strategySelected);         
-            }      
+            toggleButton(e.target)
+            setTimeout(function () {toggleButton(e.target)}, 200)
+            sendNewTask(CONTROLLED_ROBOT, btn.taskType, taskLabel, "noSelection", strategySelected);               
         }
         else
         {
@@ -720,69 +605,55 @@ function createTaskAssignmentButton(tab, taskLabel, taskType, selectionMode, isS
     tasksTab.appendChild(outerDiv);               
 }
 
-function createTableTask1(tabId) {
-    var titleDiv = document.getElementById(tabId);
-    titleDiv.innerHTML = "History of Actions";
-    titleDiv.style.fontSize = "1.3vw"; 
-    titleDiv.style.textAlign = "center"; 
-    titleDiv.style.border = "3px solid #ccc"; 
-    titleDiv.style.paddingTop = "1%";  
-    
-}
-
-function createTableTaskmiaaveras(tabId, id, strategy, task, undoButton) {
-    var tab = document.getElementById(tabId);
+function createStrategyAssignmentButton(tab, strategyLabel, strategyNumber, selectionMode) {
 
     var outerDiv = document.createElement("DIV");
-    outerDiv.classList.add("row-container");
-    outerDiv.style.display = "flex";
-    outerDiv.style.justifyContent = "space-between";
-    outerDiv.style.alignItems = "center";
-    outerDiv.style.width = "100%";
-    outerDiv.style.paddingTop = "2%";
-    outerDiv.style.padding = "13px";
-    outerDiv.style.border = "3px solid #ccc";
+    outerDiv.classList.add("settings-horizontal-container")
+    outerDiv.style.height = "18%";
 
-    var labelDiv1 = document.createElement("DIV");
-    labelDiv1.classList.add("column");
-    labelDiv1.innerHTML = id;
-    labelDiv1.style.flex = "0.5";
-    labelDiv1.style.width = "2vw"; 
-    labelDiv1.style.fontSize = "0.8em";
+    var middleDiv = document.createElement("DIV");  
+    middleDiv.classList.add("settings-horizontal-container")  
+    middleDiv.style.height = "80%";
+    outerDiv.appendChild(middleDiv);
+    
+    var innerDiv = document.createElement("DIV");   
+    innerDiv.classList.add("settings-horizontal-container")        
+    innerDiv.style.height = "100%";
+    innerDiv.style.width = "100%";     
+    innerDiv.style.justifyContent = "space-around"; 
+    middleDiv.appendChild(innerDiv);
+              
+    var btn = document.createElement("BUTTON");
+    btn.classList.add("settings-horizontal-container")
+    btn.innerHTML = strategyLabel;
+    btn.strategyNumber = strategyNumber;
+    btn.selectionMode = selectionMode;
 
-    var labelDiv2 = document.createElement("DIV");
-    labelDiv2.classList.add("column");
-    labelDiv2.innerHTML = strategy;
-    labelDiv2.style.flex = "2";
-    labelDiv2.style.width = "6vw"; 
-    labelDiv2.style.fontSize = "0.8em";
+    btn.onmousedown = function(e) {
+        if (canvas.currentlySelectedStrategyButton === e.target) {
+            // If the currently selected button is the same as the clicked button, deselect it
+            toggleButton(e.target);
+            toggleStrategyButtonSelection(e.target);
+            canvas.currentlySelectedStrategyButton = undefined;
+            strategySelected = 0;
+        } else {
+            if (canvas.currentlySelectedStrategyButton != undefined) {
+                // Deselect the previously selected button
+                toggleButton(canvas.currentlySelectedStrategyButton);
+                toggleStrategyButtonSelection(canvas.currentlySelectedStrategyButton);
+            }
+            // Select the new button
+            strategySelected = strategyNumber;
+            toggleButton(e.target);
+            toggleStrategyButtonSelection(e.target);
+            // Update the currently selected button
+            canvas.currentlySelectedStrategyButton = e.target;
+        }
+    };
+    innerDiv.appendChild(btn);               
 
-    var labelDiv3 = document.createElement("DIV");
-    labelDiv3.classList.add("column");
-    labelDiv3.innerHTML = task;
-    labelDiv3.style.flex = "2";
-    labelDiv3.style.width = "6vw"; 
-    labelDiv3.style.fontSize = "0.8em";
-
-    var buttonDiv1 = document.createElement("DIV");
-    buttonDiv1.classList.add("column");
-    buttonDiv1.style.flex = "2";
-    buttonDiv1.style.width = "6vw";  
-
-    var button1 = document.createElement("BUTTON");
-    button1.innerHTML = undoButton;
-    buttonDiv1.appendChild(button1);
-
-    button1.addEventListener("click", function() {
-        outerDiv.remove();
-    });
-
-    outerDiv.appendChild(labelDiv1);
-    outerDiv.appendChild(labelDiv2);
-    outerDiv.appendChild(labelDiv3);
-    outerDiv.appendChild(buttonDiv1);
-
-    tab.appendChild(outerDiv);
+    var tasksTab = document.getElementById(tab);
+    tasksTab.appendChild(outerDiv);               
 }
 
 function createTableTask(tabId, id, strategy, task, undoButton) {
@@ -794,42 +665,38 @@ function createTableTask(tabId, id, strategy, task, undoButton) {
     outerDiv.style.justifyContent = "space-between";
     outerDiv.style.alignItems = "center";
     outerDiv.style.width = "100%";
-    outerDiv.style.paddingTop = "2%";
+    outerDiv.style.paddingTop = "5%";
     outerDiv.style.padding = "13px";
     outerDiv.style.border = "3px solid #ccc";
 
     var labelDiv1 = document.createElement("DIV");
     labelDiv1.classList.add("column");
     labelDiv1.innerHTML = id;
-    labelDiv1.style.flex = "0.5";
-    labelDiv1.style.width = "2vw"; 
-    labelDiv1.style.fontSize = "0.8em";
+    labelDiv1.style.flex = "1";
+    labelDiv1.style.fontSize = "1.0em";
 
     var labelDiv2 = document.createElement("DIV");
     labelDiv2.classList.add("column");
-    labelDiv2.innerHTML = strategy;
-    labelDiv2.style.flex = "2";
-    labelDiv2.style.width = "6vw"; 
-    labelDiv2.style.fontSize = "0.8em";
+    labelDiv2.innerHTML = "Strategy " + strategy;
+    labelDiv2.style.flex = "4";
+    labelDiv2.style.fontSize = "1.0em";
 
     var labelDiv3 = document.createElement("DIV");
     labelDiv3.classList.add("column");
     labelDiv3.innerHTML = task;
-    labelDiv3.style.flex = "2";
-    labelDiv3.style.width = "6vw"; 
-    labelDiv3.style.fontSize = "0.8em";
+    labelDiv3.style.flex = "4";
+    labelDiv3.style.fontSize = "1.0em";
 
     var buttonDiv1 = document.createElement("DIV");
     buttonDiv1.classList.add("column");
-    buttonDiv1.style.flex = "2";
-    buttonDiv1.style.width = "6vw";  
+    buttonDiv1.style.flex = "3"; 
 
     var button1 = document.createElement("BUTTON");
     button1.innerHTML = undoButton;
     buttonDiv1.appendChild(button1);
 
     button1.addEventListener("click", function() {
-        outerDiv.remove();
+        sendNewTask(CONTROLLED_ROBOT, task, "taskLabel", "noSelection", strategySelected);         
     });
 
     outerDiv.appendChild(labelDiv1);
@@ -839,6 +706,7 @@ function createTableTask(tabId, id, strategy, task, undoButton) {
 
     tab.appendChild(outerDiv);
 }
+
 
 
 function enableClient()
@@ -881,38 +749,36 @@ function enableClient()
     });
 
     canvas.currentlySelectedTaskButton = undefined;
+    canvas.currentlySelectedStrategyButton = undefined;
+
 
     //TASK SENZA SELEZIONE DELLA POSIZIONE NEL CAMPO
-    createTaskAssignmentButton("tasks-tab", "Go to ball and dribble", "GoToBallAndDribble", "noSelection", false)
-    createTaskAssignmentButton("tasks-tab", "Pass the ball", "PassTheBall", "noSelection", false)
-    createTaskAssignmentButton("tasks-tab", "Ask for the ball", "AskForBall", "noSelection", false)
-    createTaskAssignmentButton("tasks-tab", "Spazza", "Spazza", "noSelection", false)
-    createTaskAssignmentButton("tasks-tab", "Search the ball", "SearchBall", "noSelection", false)
+    createTaskAssignmentButton("tasks-tab", "Go to ball and dribble", "GoToBallAndDribble", "noSelection")
+    createTaskAssignmentButton("tasks-tab", "Pass the ball", "PassTheBall", "noSelection")
+    createTaskAssignmentButton("tasks-tab", "Ask for the ball", "AskForBall", "noSelection")
+    createTaskAssignmentButton("tasks-tab", "Spazza", "Spazza", "noSelection")
+    createTaskAssignmentButton("tasks-tab", "Search the ball", "SearchBall", "noSelection")
         
     //TASK CON SELEZIONE DELLA POSIZIONE NEL CAMPO
-    createTaskAssignmentButton("tasks-tab2", "Dribble", "Dribble", "selection", false)
-    createTaskAssignmentButton("tasks-tab2", "Kick", "KickTheBall", "selection", false)
-    createTaskAssignmentButton("tasks-tab2", "Go to position", "GoToPosition", "selection", false)
-    createTaskAssignmentButton("tasks-tab2", "Look the ball", "LookTheBall", "selection", false)
-    createTaskAssignmentButton("tasks-tab2", "Turn", "Turn", "selection", false)
+    createTaskAssignmentButton("tasks-tab2", "Dribble", "Dribble", "selection")
+    createTaskAssignmentButton("tasks-tab2", "Kick", "KickTheBall", "selection")
+    createTaskAssignmentButton("tasks-tab2", "Go to position", "GoToPosition", "selection")
+    createTaskAssignmentButton("tasks-tab2", "Look the ball", "LookTheBall", "selection")
+    createTaskAssignmentButton("tasks-tab2", "Turn", "Turn", "selection")
     
     //STOP BUTTON
-    createTaskAssignmentButton("tasks-tab3", "Stop", "Stop", "noSelection", "selection", false)
+    createTaskAssignmentButton("tasks-tab3", "Stop", "Stop", "noSelection")
     
     //LOOK LEFT AND RIGHT
-    createTaskAssignmentButton("tasks-tab4", "Look left", "LookLeft", "noSelection", "selection", false)
-    createTaskAssignmentButton("tasks-tab4", "Look right", "LookRight", "noSelection", "selection", false)
+    createTaskAssignmentButton("tasks-tab4", "Look left", "LookLeft", "noSelection")
+    createTaskAssignmentButton("tasks-tab4", "Look right", "LookRight", "noSelection")
     
     //STRATEGY BUTTON
-    createTaskAssignmentButton("tasks-tab5", "Strategy 1", "Strategy_1", "noSelection", true)
-    createTaskAssignmentButton("tasks-tab5", "Strategy 2", "Strategy_2", "noSelection", true)
-    createTaskAssignmentButton("tasks-tab5", "Strategy 3", "Strategy_3", "noSelection", true)
-    createTaskAssignmentButton("tasks-tab5", "Strategy 4", "Strategy_4", "noSelection", true)
-    
-    //createTouchpad("tasks-tab4", "Go to position", "GoToPosition", "singlePosition")
-    
-    //TASK TABLE INITIALIZATION
-    createTableTask1("tasks")
+    createStrategyAssignmentButton("tasks-tab5", "Strategy 1", 1, "noSelection")
+    createStrategyAssignmentButton("tasks-tab5", "Strategy 2", 2, "noSelection")
+    createStrategyAssignmentButton("tasks-tab5", "Strategy 3", 3, "noSelection")
+    createStrategyAssignmentButton("tasks-tab5", "Strategy 4", 4, "noSelection")
+
 }
 
 var KEEPALIVE_SEND_INTERVAL = 5000;
@@ -1104,8 +970,7 @@ function setupSocket(webSocket)
                 lastReceivedTaskID += 1
                 message_content = message_content.split(":")[1]
                 var message_fields = message_content.split(",")
-                addTask(message_fields[1], message_fields[0])
-                createTableTask("tasks", message_fields[0], strategySelected, message_fields[1], "undo")
+                createTableTask("taskCanvas", message_fields[0], strategySelected, message_fields[1], "undo")
             }    
         }
     };

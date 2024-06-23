@@ -297,7 +297,7 @@ webSocket.on('request', function(request) {
 
           try{
             //console.log(generateHeader() + message_content)
-            console.log(generateWebSocketHeader() + "lastReceivedTask:" + taskID)
+            console.log(generateWebSocketHeader() + "lastReceivedTask:" + taskID + taskType)
             currentConnection.sendUTF(generateWebSocketHeader() + "lastReceivedTask:" + taskID + "," + taskType)
             write_socket.send(generateHeader() + message_content, 65300, LOCAL_BACKEND_IP, (err) => {});
           } catch {}

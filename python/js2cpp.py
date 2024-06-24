@@ -14,7 +14,7 @@ stop_threads = threading.Event()
 
 # Create socket for receiving messages from JavaScript
 receive_sock_js = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-receive_sock_js.bind((config.UDP_IP_CPP, config.UDP_RECEIVE_PORT_JS))
+receive_sock_js.bind(("127.0.0.1", config.UDP_RECEIVE_PORT_JS))
 # Create socket for sending messages to C++
 send_sock_cpp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 

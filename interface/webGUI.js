@@ -664,26 +664,26 @@ function createTableTask(tabId, id, strategy, task, undoButton) {
     outerDiv.style.alignItems = "center";
     outerDiv.style.width = "100%";
     outerDiv.style.paddingTop = "5%";
-    outerDiv.style.padding = "13px";
+    outerDiv.style.padding = "1vw";
     outerDiv.style.border = "3px solid #ccc";
 
     var labelDiv1 = document.createElement("DIV");
     labelDiv1.classList.add("column");
     labelDiv1.innerHTML = id;
     labelDiv1.style.flex = "1";
-    labelDiv1.style.fontSize = "1.0em";
+    labelDiv1.style.fontSize = "1.0vw"; // Cambiato da 1.0em a 1.0vw
 
     var labelDiv2 = document.createElement("DIV");
     labelDiv2.classList.add("column");
     labelDiv2.innerHTML = "Strategy " + strategy;
     labelDiv2.style.flex = "4";
-    labelDiv2.style.fontSize = "1.0em";
+    labelDiv2.style.fontSize = "1.0vw"; // Cambiato da 1.0em a 1.0vw
 
     var labelDiv3 = document.createElement("DIV");
     labelDiv3.classList.add("column");
     labelDiv3.innerHTML = task;
     labelDiv3.style.flex = "4";
-    labelDiv3.style.fontSize = "1.0em";
+    labelDiv3.style.fontSize = "1.0vw";
 
     var buttonDiv1 = document.createElement("DIV");
     buttonDiv1.classList.add("column");

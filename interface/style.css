@@ -11,31 +11,95 @@ body {
     width: 20%;
     height: 100%;
     display: flex;
-    justify-content: center;
-    align-items: center;
     background-color: #d6d3d3;
 }
 
-#statistic table {
-    width: 70%;
-    height: 90%;
-    border-collapse: collapse;
-    margin: 0 auto;
+.container_statistic {
+    display: flex;
+    padding: 1%;
+    flex-direction: column;
+    width: 20%;
+}
+.row {
+    display: flex;
+
 }
 
-#statistic th,
-#statistic td {
-    border: 1% solid black;
-    padding: 0.5%;
-    text-align: center;
+.cell, .cell_row {
+    flex: 1;
+    border: 0.2vw solid black;
+    display: flex;
+    justify-content: center; 
+    align-items: center;   
+
+}
+.cell {
+    height: 32vw;
+    width: 5vw;
+}
+.cell_row {
+    height: 4vw;
+    width: 5vw;
 }
 
-#statistic th {
-    background-color: #f2f2f2;
+.type_of_robot {
+    height: 100%;
+    width: 40%;
+    display: flex;
+    justify-content: center; 
+    align-items: center;    
 }
 
-#statistic tr {
-    background-color: #f2f2f2;
+.type_of_robot h1 {
+    transform: rotate(270deg);
+    white-space: nowrap;
+    letter-spacing: 0.2vw;
+    font-size: 2vw;
+}
+
+h3 {
+    transform: rotate(270deg); 
+    white-space: nowrap;
+    font-size: 1.0vw; 
+    letter-spacing: 0.1vw;
+}
+
+.model {
+    height: 100%;
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+}
+.status {
+    height: 100%;
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+}
+.ball-model-item, .obstacle-model-item, .other-model-item {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;   
+}
+.ball-status-item, .obstacle-status-item, .other-status-item {
+    height: 100%;
+    width: 80%;
+    display: flex;
+    justify-content: center; 
+    align-items: center;    
+}
+
+.circle-status {
+    width: 1.8vw;
+    height: 1.8vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, red, white);
+}
+
+.information label{
+    font-size: 1.4vw;
 }
 
 #taskContainer {
@@ -47,6 +111,7 @@ body {
 
 #taskContainer h1 {
     text-align: center;
+    font-size: 2vw;
 }
 
 #canvas-container {
@@ -79,31 +144,27 @@ body {
     width: 50%;
     height: 50%;
     left: 50%;
-    border-right: 2px solid gray;
-    border-top: 2px solid gray;
-    border-bottom: 2px solid gray;
+    border-right: 0.3vw solid gray;
+    border-top: 0.3vw solid gray;
+    border-bottom: 0.3vw solid gray;
     background-color: #e5dada;
-}
-
-label {
-    font-size: 1.0vw;
 }
 
 #tasks-tab2 {
     width: 50%;
     height: 50%;
-    border-left: 2px solid gray;
-    border-top: 2px solid gray;
-    border-bottom: 2px solid gray;
+    border-left: 0.3vw solid gray;
+    border-top: 0.3vw solid gray;
+    border-bottom: 0.3vw solid gray;
     background-color: #e5dada;
 }
 
 #tasks-tab3 {
     top: 45%;
     width: 100%;
-    border-left: 2px solid gray;
-    border-bottom: 2px solid gray;
-    border-right: 2px solid gray;
+    border-left: 0.3vw solid gray;
+    border-bottom: 0.3vw solid gray;
+    border-right: 0.3vw solid gray;
     height: 35%;
     background-color: #e5dada;
 }
@@ -111,7 +172,7 @@ label {
 #tasks-tab4 {
     top: 53%;
     width: 100%;
-    border: 2px solid gray;
+    border: 0.3vw solid gray;
     height: 40%;
     background-color: #e5dada;
 }
@@ -119,7 +180,7 @@ label {
 #tasks-tab5 {
     top: 70%;
     width: 100%;
-    border: 2px solid gray;
+    border: 0.3vw solid gray;
     height: 40%;
     background-color: #e5dada;
 }
@@ -165,7 +226,7 @@ label {
 .settings-vertical-container button,
 .settings-horizontal-container button {
     background-color: #ffffff;
-    border: 2px solid black;
+    border: 0.2vw solid black;
     width: 100%;
     height: 100%;
     color: rgb(0, 0, 0);
@@ -180,12 +241,6 @@ label {
 .settings-vertical-container button.active,
 .settings-horizontal-container button.active {
     background-color: #f40000;
-}
-
-.colorPreview {
-    width: 80%;
-    height: 40%;
-    border: grey 1px solid;
 }
 
 #textureImage {
@@ -204,28 +259,6 @@ input[type=range] {
 
 }
 
-input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 4%;
-    height: 1.8vw;
-    background: #4CAF50;
-    cursor: pointer;
-    border: solid 0.1vw #d3d3d3;
-    border-radius: 0.8vw;
-}
-
-input[type=range]::-moz-range-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 4%;
-    height: 1.8vw;
-    background: #4CAF50;
-    cursor: pointer;
-    border: solid 0.1vw #d3d3d3;
-    border-radius: 0.8vw;
-}
-
 .vertical_sliders_container {
     display: flex;
     flex-direction: row;
@@ -233,7 +266,6 @@ input[type=range]::-moz-range-thumb {
     position: absolute;
 
 }
-
 
 .touchpad-outer-container {
     position: relative;
@@ -249,8 +281,6 @@ input[type=range]::-moz-range-thumb {
     width: 100%;
     height: 100%;
 }
-
-
 
 input[type=range][orient=vertical] {
     height: 0.6vw;
@@ -282,55 +312,6 @@ input[type=range][orient=vertical]::-moz-range-thumb {
     border-radius: 0.8vw;
 }
 
-table {
-    width: 25vw;
-    height: 30vw;
-    border-collapse: collapse;
-    margin: 0 auto;
-}
-
-th,
-td {
-    border: 0.3vw solid black;
-    padding: 0.5vw;
-    text-align: center;
-    font-size: 1.0vw;
-    background-color: #f2f2f2;
-}
-
-tr {
-    width: 0.5vw;
-    background-color: #f2f2f2;
-}
-
-.tall-row {
-    height: 3vw;
-}
-
-.vertical-text {
-    writing-mode: vertical-lr;
-    transform: rotate(180deg);
-    vertical-align: middle;
-    margin-bottom: 5vh;
-}
-
-.circle-cell {
-    display: flex;
-    align-items: center;
-    margin-top: 70px;
-}
-
-.circle {
-    width: 1vw;
-    display: inline-block;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    margin-right: 5px;
-    margin-bottom: 8vh;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    background: radial-gradient(circle, black 30%, #FFF 70%);
-}
 
 .container {
     display: flex;
@@ -342,3 +323,4 @@ tr {
     display: flex;
     flex-direction: column;
 }
+

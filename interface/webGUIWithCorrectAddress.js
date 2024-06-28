@@ -450,8 +450,8 @@ function drawObjects(canvas)
     {
         drawRobot(ctx, robotNumber, 
                     robotPosition[0], 
-                    Utils.mapValue(robotPosition[1], -CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_WIDTH/2, -CURRENT_CANVAS_FIELD_WIDTH/2, CURRENT_CANVAS_FIELD_WIDTH/2),
                     Utils.mapValue(robotPosition[2], -CANVAS_FIELD_HEIGHT/2, CANVAS_FIELD_HEIGHT/2, -CURRENT_CANVAS_FIELD_HEIGHT/2, CURRENT_CANVAS_FIELD_HEIGHT/2), 
+                    Utils.mapValue(-robotPosition[1], -CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_WIDTH/2, -CURRENT_CANVAS_FIELD_WIDTH/2, CURRENT_CANVAS_FIELD_WIDTH/2),
                     robotNumber == CONTROLLED_ROBOT, robotNumber == AUTONOMOUS_ROBOT)
     };
     drawObstacles(ctx)
@@ -944,7 +944,19 @@ function setupSocket(webSocket)
                         -Math.floor(parseFloat(obsCoords[3]))
                     ];
                 }
-               
+            }
+
+            if(message_content.startsWith("robotPos"))
+            {
+                var field = message_content.split(":")[1]
+                obsCoords = field.split(",")
+                console.log(obsCoords)
+                robotNumber = parseInt(obsCoords[0]);
+                robotNumbersToPositions[robotNumber] = [
+                    parseFloat(obsCoords[1]+Math.PI), 
+                    Math.floor(parseFloat(obsCoords[2])), 
+                    -Math.floor(parseFloat(obsCoords[3]))
+                ];
             }
             
             else if(message_content.startsWith("ballPosition"))

@@ -1,4 +1,4 @@
-UDP_IP_CPP: "192.168.19.28"
+UDP_IP_CPP: "0.0.0.0" # LUIGI IP Address
 
 UDP_RECEIVE_PORT_CPP: 65305
 UDP_SEND_PORT_CPP: 65306
@@ -6,4 +6,18 @@ UDP_SEND_PORT_CPP: 65306
 UDP_RECEIVE_PORT_JS: 65300
 UDP_SEND_PORT_JS: 65301
 
-format: "<BBii"
+# 1B Comando 
+# 1B Strategia
+# 8B [pos_x, pos_y]
+command_format: "<BBff" 
+
+# 1 double di qualcosa
+# 4B di header
+# 4B [versione, player_num, team_num, fallen]
+# 12B [pos_x, pos_y, theta]
+# 4B [ball_age]
+# 8B [ball_x, ball_y]
+# 1B di player_role
+# 1B di num_data_bytes
+# 1 short di padding
+data_format: "<d4sBBBBffffffBBh"

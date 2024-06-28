@@ -25,3 +25,21 @@ class Command(Enum):
     Stop = 11
     LookLeft = 12
     LookRight = 13
+    
+      
+class DataEntryIndex(Enum):
+    Suca = 0
+    Header = 1
+    Version = 2
+    PlayerNum = 3
+    TeamNum = 4
+    Fallen = 5
+    PosX = 6
+    PosY = 7
+    Theta = 8
+    BallAge = 9
+    BallPosX = 10
+    BallPosY = 11
+    PlayerRole = 12
+    NumDataBytes = 13
+    Padding = 14

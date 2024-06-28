@@ -32,7 +32,6 @@ def update():
     while not stop_threads.is_set():
         try:
             data, addr = receive_sock_js.recvfrom(1024)
-            print(data)
             try:
                 message = data.decode()
                 message_split = message.split('|')[1]
@@ -54,7 +53,7 @@ def update():
             except UnicodeDecodeError:
                 print(f"Received non-UTF-8 message from JavaScript: {data} from {addr}")
             command_number = Command[task_type].value
-            encoded_data = struct.pack(config.format, command_number, strategy_number, x_position, y_position)
+            encoded_data = struct.pack(config.command_format, command_number, strategy_number, x_position, y_position)
             print(f"Sending message to C++: {encoded_data}")
             send_sock_cpp.sendto(encoded_data, (config.UDP_IP_CPP, config.UDP_SEND_PORT_CPP))
         except Exception as e:

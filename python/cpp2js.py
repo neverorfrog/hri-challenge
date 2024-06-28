@@ -43,9 +43,9 @@ def update():
                 robot_number = debug_packet[DataEntryIndex.PlayerNum.value]
                 print("RobotNumber: ", robot_number)
                 print("Pose: ", pos_x, pos_y, theta)
-                pose_controlled = f"3, {-2},{pos_x},{pos_y},{theta}"
-                pose_controlled_message = f"|controlledRobot:{pose_controlled}"
-                send_sock_js.sendto(pose_controlled_message.encode(), (config.UDP_IP_CPP, config.UDP_SEND_PORT_JS))           
+                pose_controlled = f"4,{theta},{pos_x},{pos_y}"
+                pose_controlled_message = f"|robotPos:{pose_controlled}"
+                send_sock_js.sendto(pose_controlled_message.encode(), (config.UDP_IP_JS, config.UDP_SEND_PORT_JS))           
             else:
                 print(f"Received unexpected data from C++: {data}")
         except Exception as e:

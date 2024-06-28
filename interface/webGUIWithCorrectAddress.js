@@ -17,16 +17,16 @@ var gl;
 
 var showMesh, showNormals, showContours, showLightPosition, showTexture;
 
-DEFAULT_CANVAS_FIELD_WIDTH = 5400;
-DEFAULT_CANVAS_FIELD_HEIGHT = 7400;
+DEFAULT_CANVAS_FIELD_WIDTH = 5500;
+DEFAULT_CANVAS_FIELD_HEIGHT = 9000;
 
-CURRENT_CANVAS_FIELD_WIDTH = 5400;
-CURRENT_CANVAS_FIELD_HEIGHT = 7400;
+CURRENT_CANVAS_FIELD_WIDTH = 8400;
+CURRENT_CANVAS_FIELD_HEIGHT = 12000;
 
-CURRENT_BORDER_STRIP_WIDTH = 700;
+CURRENT_BORDER_STRIP_WIDTH = 0;
 
-var CURRENT_FIELD_WIDTH = CURRENT_CANVAS_FIELD_WIDTH - CURRENT_BORDER_STRIP_WIDTH;
-var CURRENT_FIELD_HEIGHT = CURRENT_CANVAS_FIELD_HEIGHT - CURRENT_BORDER_STRIP_WIDTH;
+var CURRENT_FIELD_HEIGHT = CURRENT_CANVAS_FIELD_WIDTH - CURRENT_BORDER_STRIP_WIDTH;
+var CURRENT_FIELD_WIDTH = CURRENT_CANVAS_FIELD_HEIGHT - CURRENT_BORDER_STRIP_WIDTH;
 
 var CANVAS_RESOLUTION_FACTOR = 0.4;
 
@@ -53,8 +53,8 @@ var FieldDimensions =
     CENTER_CIRCLE_RADIUS : mapValueToCurrentCanvas(mapValueToCurrentField(500)),
     CENTER_DOT_RADIUS : mapValueToCurrentCanvas(mapValueToCurrentField(35)),
 
-    Y_POS_SIDE_LINE : mapValueToCurrentCanvas(mapValueToCurrentField(3200)),
-    X_POS_SIDE_LINE : mapValueToCurrentCanvas(mapValueToCurrentField(2300)),
+    Y_POS_SIDE_LINE : mapValueToCurrentCanvas(mapValueToCurrentField(3000)),
+    X_POS_SIDE_LINE : mapValueToCurrentCanvas(mapValueToCurrentField(2000)),
 
     PENALTY_AREA_WIDTH : mapValueToCurrentCanvas(mapValueToCurrentField(3000)),
     PENALTY_AREA_HEIGHT : mapValueToCurrentCanvas(mapValueToCurrentField(1400)),
@@ -271,7 +271,7 @@ function drawField(canvas)
     drawLine(ctx, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
     drawLine(ctx, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
-    drawCircle(ctx, 0, -FieldDimensions.PENALTY_AREA_HEIGHT/2-550, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawCircle(ctx, 0, -FieldDimensions.PENALTY_AREA_HEIGHT/2-750, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
     drawLine(ctx, -FieldDimensions.X_POS_PENALTY_CROSS, FieldDimensions.PENALTY_CROSS_SIZE/2, -FieldDimensions.X_POS_PENALTY_CROSS, -FieldDimensions.PENALTY_CROSS_SIZE/2, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
     drawLine(ctx, -FieldDimensions.X_POS_PENALTY_CROSS - FieldDimensions.PENALTY_CROSS_SIZE/2, 0, -FieldDimensions.X_POS_PENALTY_CROSS + FieldDimensions.PENALTY_CROSS_SIZE/2, 0, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
@@ -279,7 +279,7 @@ function drawField(canvas)
     drawLine(ctx, FieldDimensions.X_POS_PENALTY_CROSS, FieldDimensions.PENALTY_CROSS_SIZE/2, FieldDimensions.X_POS_PENALTY_CROSS, -FieldDimensions.PENALTY_CROSS_SIZE/2, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
     drawLine(ctx, FieldDimensions.X_POS_PENALTY_CROSS + FieldDimensions.PENALTY_CROSS_SIZE/2, 0, FieldDimensions.X_POS_PENALTY_CROSS - FieldDimensions.PENALTY_CROSS_SIZE/2, 0, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
-    drawCircle(ctx, 0, FieldDimensions.PENALTY_AREA_HEIGHT/2+550, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawCircle(ctx, 0, FieldDimensions.PENALTY_AREA_HEIGHT/2+750, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
         
     drawRectangle(ctx, -FieldDimensions.GOAL_POST_WIDTH/2,-FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.GOAL_POST_HEIGHT, FieldDimensions.GOAL_POST_WIDTH, FieldDimensions.GOAL_POST_HEIGHT, "#CCCCCC", "#FFFFFF", 1, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2])
     drawLine(ctx, -FieldDimensions.GOAL_POST_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.GOAL_POST_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.GOAL_POST_HEIGHT, "#FFFFFF", FieldDimensions.GOAL_POST_RADIUS/2, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
@@ -301,8 +301,8 @@ function scaleFieldPositionToCanvas(canvas, xFieldPos, yFieldPos)
 {
     var boundingRect = canvas.getBoundingClientRect();
 
-    var unscaledMouseXOnCanvas = Math.round(Utils.mapValue(xFieldPos, 0, canvas.width, -Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2), Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2)));
-    var unscaledMouseYOnCanvas = Math.round(Utils.mapValue(yFieldPos, 0, canvas.height, -Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2), Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2)));
+    var unscaledMouseXOnCanvas = Math.round(Utils.mapValue(xFieldPos, 0, canvas.height, -Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2), Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2)));
+    var unscaledMouseYOnCanvas = Math.round(Utils.mapValue(yFieldPos, 0, canvas.width, -Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2), Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2)));
 
     return [unscaledMouseXOnCanvas, unscaledMouseYOnCanvas]
 
@@ -319,10 +319,10 @@ function scaleMousePositionToField(canvas, xPos, yPos)
     var mouseXOnCanvas = Math.round((xPos - boundingRect.left) * scaleX);  
     var mouseYOnCanvas = Math.round((yPos - boundingRect.top) * scaleY);     
 
-    var scaledMouseXOnCanvas = Math.round(Utils.mapValue(mouseXOnCanvas, -Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2), Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2), 0, canvas.width));
-    var scaledMouseYOnCanvas = Math.round(Utils.mapValue(mouseYOnCanvas, -Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2), Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2), 0, canvas.height));
+    var scaledMouseYOnCanvas = Math.round(Utils.mapValue(mouseXOnCanvas, -Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2), Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2), 0, canvas.width));
+    var scaledMouseXOnCanvas = Math.round(Utils.mapValue(mouseYOnCanvas, -Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2), Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2), 0, canvas.height));
 
-    return [scaledMouseXOnCanvas, scaledMouseYOnCanvas]
+    return [-scaledMouseXOnCanvas, scaledMouseYOnCanvas]
 }
 
 function viewportMouseToCanvasCoordinates(canvas, xPos, yPos)
@@ -419,7 +419,8 @@ function drawTargetPreviewOnField(canvas, debugInfo=false, scaledTargetPos = und
     drawTargetOnField(canvas, unscaledTarget[0], unscaledTarget[1], targetColor)
 }
 
-function drawObstacles(ctx)
+function 
+drawObstacles(ctx)
 {
     console.log("START")
     for(var obs of obstaclesPositions)
@@ -998,4 +999,3 @@ disableClient("Waiting for socket connection");
 var webSocket = new WebSocket("ws://localhost:4000");
 setupSocket(webSocket)
 waitForWebSocketConnection(webSocket);
-

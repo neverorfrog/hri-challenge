@@ -1,0 +1,14 @@
+- [ ] Implementare la carta di default
+  - [ ] Scan
+- [ ] Mandare l'immagine della upper dal nao e stamparla
+- [ ] Plot del pacchetto di debug
+  - [ ] Posizione del robot controllato
+  - [ ] Posizione degli ostacoli (incluso robot autonomo)
+  - [ ] Posizione della palla
+- [ ] Informazioni di interfaccia dal pacchetto di debug
+  - [ ] Score
+  - [ ] Packets left
+  - [ ] Time left
+  - [ ] Ultima volta che ho visto la palla
+- [ ] Scenario in difesa
+  - [ ] Plottare linee di congiunzione?

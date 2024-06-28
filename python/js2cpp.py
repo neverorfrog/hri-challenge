@@ -30,30 +30,50 @@ def update():
 
     """
     while not stop_threads.is_set():
+        data, addr = receive_sock_js.recvfrom(1024)
+        
         try:
-            data, addr = receive_sock_js.recvfrom(1024)
-            try:
-                message = data.decode()
-                message_split = message.split('|')[1]
-                content_message = message_split.split(',')
-                task_type = content_message[2]
-                task_id = int(content_message[3])
-                strategy_number = int(content_message[5])
-                task_label = content_message[4]
-                selection = content_message[1]
-                print(f"Task Type: {task_type}")
-                print(f"Task Label: {task_label}")
-                print(f"Task ID: {task_id}")
-                print(f"Strategy Number: {strategy_number}")
-                if(selection == "selection"):
-                    x_position = int(content_message[6])
-                    y_position = int(content_message[7])
-                    print(f"X Position: {x_position}")
-                    print(f"Y Position: {y_position}")
-            except UnicodeDecodeError:
-                print(f"Received non-UTF-8 message from JavaScript: {data} from {addr}")
+            message = data.decode()
+            message_split = message.split('|')[1]
+            content_message = message_split.split(',')
+            task_type = content_message[2]
+            task_id = int(content_message[3])
+            strategy_number = int(content_message[5])
+            task_label = content_message[4]
+            selection = content_message[1]
+            print(f"Task Type: {task_type}")
+            print(f"Task Label: {task_label}")
+            print(f"Task ID: {task_id}")
+            print(f"Strategy Number: {strategy_number}")
+            if(selection == "selection"):
+                x_position = int(content_message[6])
+                y_position = int(content_message[7])
+                print(f"X Position: {x_position}")
+                print(f"Y Position: {y_position}")
+            else:
+                x_position = 0
+                y_position = 0
+        except UnicodeDecodeError:
+            print(f"Received non-UTF-8 message from JavaScript: {data} from {addr}")
+             
+        try:   
             command_number = Command[task_type].value
-            encoded_data = struct.pack(config.command_format, command_number, strategy_number, x_position, y_position)
+            if command_number > config.command_offset:
+                command_body_number = Command.Null.value
+                command_head_number = command_number - config.command_offset
+            else:
+                command_body_number = command_number
+                command_head_number = Command.Null.value
+            encoded_data = struct.pack(
+                config.command_format, 
+                command_body_number, 
+                command_head_number, 
+                strategy_number, 
+                x_position, 
+                y_position
+            )
+            print("Head number", command_head_number)
+            print("Body number", command_body_number)
             print(f"Sending message to C++: {encoded_data}")
             send_sock_cpp.sendto(encoded_data, (config.UDP_IP_CPP, config.UDP_SEND_PORT_CPP))
         except Exception as e:

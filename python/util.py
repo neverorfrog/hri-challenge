@@ -12,20 +12,27 @@ def load_config(file_path):
             print(f"Error decoding YAML: {e}")
             
 class Command(Enum):
+    Null = 0
     Dribble = 1
     GoToBallAndDribble = 2
     KickTheBall = 3
     PassTheBall = 4
     GoToPosition = 5
     AskForBall = 6
-    LookTheBall = 7
-    Spazza = 8
-    Turn = 9
-    SearchBall = 10
-    Stop = 11
-    LookLeft = 12
-    LookRight = 13
+    Spazza = 7
+    Turn = 8
+    SearchBall = 9
+    Stop = 10
+    LookLeft = 11
+    LookRight = 12
+    Scan = 13
+    LookTheBall = 14
     
+class Strategy(Enum):
+    Default = 0
+    Passaggi = 1
+    Boh1 = 2
+    Boh2 = 3
       
 class DataEntryIndex(Enum):
     Suca = 0

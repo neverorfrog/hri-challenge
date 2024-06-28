@@ -1,4 +1,4 @@
-UDP_IP_CPP: "0.0.0.0" # LUIGI IP Address
+UDP_IP_CPP: "10.0.19.25" # LUIGI IP Address
 
 UDP_RECEIVE_PORT_CPP: 65305
 UDP_SEND_PORT_CPP: 65306
@@ -6,10 +6,13 @@ UDP_SEND_PORT_CPP: 65306
 UDP_RECEIVE_PORT_JS: 65300
 UDP_SEND_PORT_JS: 65301
 
-# 1B Comando 
+command_offset: 10
+
+# 1B Comando corpo
+# 1B Comanda testa
 # 1B Strategia
 # 8B [pos_x, pos_y]
-command_format: "<BBff" 
+command_format: "<BBBff" 
 
 # 1 double di qualcosa
 # 4B di header

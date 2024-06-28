@@ -37,6 +37,8 @@ def update():
             data, addr = receive_sock_cpp.recvfrom(1024)
             if len(data) == struct.calcsize(config.data_format):
                 debug_packet = struct.unpack(config.data_format, data)
+                
+                # Robot pose
                 pos_x = debug_packet[DataEntryIndex.PosX.value]
                 pos_y = debug_packet[DataEntryIndex.PosY.value]
                 theta = debug_packet[DataEntryIndex.Theta.value]
@@ -46,6 +48,15 @@ def update():
                 pose_controlled = f"4,{theta},{pos_x},{pos_y}"
                 pose_controlled_message = f"|robotPos:{pose_controlled}"
                 send_sock_js.sendto(pose_controlled_message.encode(), (config.UDP_IP_JS, config.UDP_SEND_PORT_JS))           
+                
+                # Ball position
+                ballpos_x = debug_packet[DataEntryIndex.BallPosX.value]
+                ballpos_y = debug_packet[DataEntryIndex.BallPosY.value]
+                print("BallPos: ", ballpos_x, ballpos_y)
+                ball_position = f"{ballpos_x},{ballpos_y}"
+                ball_position_message = f"|ballPosition:{ball_position}"
+                send_sock_js.sendto(ball_position_message.encode(), (config.UDP_IP_JS, config.UDP_SEND_PORT_JS))
+                
             else:
                 print(f"Received unexpected data from C++: {data}")
         except Exception as e:

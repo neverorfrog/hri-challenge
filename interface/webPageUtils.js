@@ -1,82 +1,26 @@
-function toggleButton(targetButton){
-    if(targetButton.hasAttribute("noToggle")) return;
-    if(targetButton.className.includes("active"))
-    {
-        targetButton.className = targetButton.className.replace(" active", "")
-    }
-    else targetButton.className += " active";
+function toggleButton(targetButton) {
+    if (targetButton.hasAttribute("noToggle")) return;
 
-    for (button of targetButton.parentElement.getElementsByTagName("button")) {
-    if (button.id!=targetButton.id){
-        button.className = tab_button.className.replace(" active", "");
-    }
-    }
-
-    if(targetButton.innerHTML.includes(" ON"))
-    {
-        targetButton.innerHTML = targetButton.innerHTML.replace(" ON", " OFF")
-    } else if(targetButton.innerHTML.includes(" OFF"))
-    {
-        targetButton.innerHTML = targetButton.innerHTML.replace(" OFF", " ON")
-    }
-
-    if(targetButton.innerHTML.includes("Pause"))
-    {
-        targetButton.innerHTML = targetButton.innerHTML.replace("Pause", "Resume")
-    } else if(targetButton.innerHTML.includes("Resume"))
-    {
-        targetButton.innerHTML = targetButton.innerHTML.replace("Resume", "Pause")
-    }
-};
-
-
-function toggleTaskButtonSelection(button) {
-
-    var canvas = document.getElementById("field-canvas");
-    if(canvas.currentlySelectedTaskButton == button)
-    {
-        
-        canvas.currentlySelectedTaskButton = undefined;
-        console.log("Task button "+button.id+" unselected")
-    }
-    else 
-    {
-        canvas.currentlySelectedTaskButton = button;
-        
-        console.log("Task button "+button.id+" selected with mode "+document.getElementById("field-canvas").currentlySelectedTaskButton.selectionMode);
-    }
-}
-
-function toggleStrategyButtonSelection(button) {
-
-    var canvas = document.getElementById("field-canvas");
-    if(canvas.currentlySelectedStrategyButton == button)
-    {
-        
-        canvas.currentlySelectedStrategyButton = undefined;
-        console.log("Strategy button "+button.id+" unselected")
-    }
-    else 
-    {
-        canvas.currentlySelectedStrategyButton = button;
-        
-        console.log("Strategy button "+button.id+" selected with mode "+document.getElementById("field-canvas").currentlySelectedTaskButton.selectionMode);
+    // Toggle the "active" class
+    if (targetButton.classList.contains("active")) {
+        targetButton.classList.remove("active");
+    } else {
+        targetButton.classList.add("active");
     }
 }
 
 function toggleTaskButtonSelection(button) {
-
     var canvas = document.getElementById("field-canvas");
-    if(canvas.currentlySelectedTaskButton == button)
-    {
-        
+
+    if (canvas.currentlySelectedTaskButton === button) {
+        // If the clicked button is already selected, unselect it
         canvas.currentlySelectedTaskButton = undefined;
-        console.log("Task button "+button.id+" unselected")
-    }
-    else 
-    {
+        button.classList.remove("active");
+        console.log("Task button " + button.id + " unselected");
+    } else {
+        // Otherwise, select the clicked button
         canvas.currentlySelectedTaskButton = button;
-        
-        console.log("Task button "+button.id+" selected with mode "+document.getElementById("field-canvas").currentlySelectedTaskButton.selectionMode);
+        button.classList.add("active");
+        console.log("Task button " + button.id + " selected with mode " + button.selectionMode);
     }
 }

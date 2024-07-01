@@ -4,8 +4,8 @@ if(typeof console === "undefined"){
     console = {};
 }
 
-var CONTROLLED_ROBOT = 4
-var AUTONOMOUS_ROBOT = 3
+var CONTROLLED_ROBOT = 3
+var AUTONOMOUS_ROBOT = 4
 
 var strategySelected = 0
 
@@ -15,16 +15,17 @@ var gl;
 
 var showMesh, showNormals, showContours, showLightPosition, showTexture;
 
-DEFAULT_CANVAS_FIELD_WIDTH = 5500;
-DEFAULT_CANVAS_FIELD_HEIGHT = 9000;
 
-CURRENT_CANVAS_FIELD_WIDTH = 8400;
-CURRENT_CANVAS_FIELD_HEIGHT = 12000;
+var DEFAULT_CANVAS_FIELD_WIDTH = 6000;
+var DEFAULT_CANVAS_FIELD_HEIGHT = 9000;
 
-CURRENT_BORDER_STRIP_WIDTH = 0;
+var BORDER_STRIP_WIDTH = 700;
 
-var CURRENT_FIELD_HEIGHT = CURRENT_CANVAS_FIELD_WIDTH - CURRENT_BORDER_STRIP_WIDTH;
-var CURRENT_FIELD_WIDTH = CURRENT_CANVAS_FIELD_HEIGHT - CURRENT_BORDER_STRIP_WIDTH;
+var CURRENT_CANVAS_FIELD_WIDTH = DEFAULT_CANVAS_FIELD_WIDTH + 2*BORDER_STRIP_WIDTH; 
+var CURRENT_CANVAS_FIELD_HEIGHT = DEFAULT_CANVAS_FIELD_HEIGHT + 2*BORDER_STRIP_WIDTH;
+
+var CURRENT_FIELD_WIDTH = CURRENT_CANVAS_FIELD_WIDTH;
+var CURRENT_FIELD_HEIGHT = CURRENT_CANVAS_FIELD_HEIGHT;
 
 var CANVAS_RESOLUTION_FACTOR = 0.4;
 
@@ -34,43 +35,38 @@ var CANVAS_FIELD_HEIGHT = Math.floor(CURRENT_CANVAS_FIELD_HEIGHT * CANVAS_RESOLU
 var FIELD_WIDTH = Math.floor(CURRENT_FIELD_WIDTH * CANVAS_RESOLUTION_FACTOR);
 var FIELD_HEIGHT = Math.floor(CURRENT_FIELD_HEIGHT * CANVAS_RESOLUTION_FACTOR);
 
-function mapValueToCurrentField(value)
-{
-    return Utils.mapValue(value, 0, CURRENT_CANVAS_FIELD_WIDTH, 0, DEFAULT_CANVAS_FIELD_WIDTH)
+function mapValueToCurrentField(value) {
+    return Utils.mapValue(value, 0, DEFAULT_CANVAS_FIELD_WIDTH, 0, DEFAULT_CANVAS_FIELD_WIDTH);
 }
 
-function mapValueToCurrentCanvas(value)
-{
+function mapValueToCurrentCanvas(value) {
     return Utils.mapValue(value, 0, CANVAS_FIELD_WIDTH, 0, CURRENT_CANVAS_FIELD_WIDTH);
 }
 
-var FieldDimensions = 
-{
-    FIELD_LINES_WIDTH : mapValueToCurrentCanvas(mapValueToCurrentField(50)),
+var FieldDimensions = {
+    FIELD_LINES_WIDTH: mapValueToCurrentCanvas(mapValueToCurrentField(50)),
 
-    CENTER_CIRCLE_RADIUS : mapValueToCurrentCanvas(mapValueToCurrentField(500)),
-    CENTER_DOT_RADIUS : mapValueToCurrentCanvas(mapValueToCurrentField(35)),
+    CENTER_CIRCLE_RADIUS: mapValueToCurrentCanvas(mapValueToCurrentField(750)),
+    CENTER_DOT_RADIUS: mapValueToCurrentCanvas(mapValueToCurrentField(50)),
 
-    Y_POS_SIDE_LINE : mapValueToCurrentCanvas(mapValueToCurrentField(3000)),
-    X_POS_SIDE_LINE : mapValueToCurrentCanvas(mapValueToCurrentField(2000)),
+    Y_POS_SIDE_LINE: mapValueToCurrentCanvas(mapValueToCurrentField(4500)),
+    X_POS_SIDE_LINE: mapValueToCurrentCanvas(mapValueToCurrentField(3000)),
 
-    PENALTY_AREA_WIDTH : mapValueToCurrentCanvas(mapValueToCurrentField(3000)),
-    PENALTY_AREA_HEIGHT : mapValueToCurrentCanvas(mapValueToCurrentField(1400)),
+    PENALTY_AREA_WIDTH: mapValueToCurrentCanvas(mapValueToCurrentField(4000)),
+    PENALTY_AREA_HEIGHT: mapValueToCurrentCanvas(mapValueToCurrentField(1650)),
 
-    SMALL_PENALTY_AREA_WIDTH : mapValueToCurrentCanvas(mapValueToCurrentField(1600)),
-    SMALL_PENALTY_AREA_HEIGHT : mapValueToCurrentCanvas(mapValueToCurrentField(600)),
+    SMALL_PENALTY_AREA_WIDTH: mapValueToCurrentCanvas(mapValueToCurrentField(2200)),
+    SMALL_PENALTY_AREA_HEIGHT: mapValueToCurrentCanvas(mapValueToCurrentField(600)),
 
-    PENALTY_CROSS_SIZE : mapValueToCurrentCanvas(mapValueToCurrentField(100)),
-    PENALTY_CROSS_X_DISTANCE : mapValueToCurrentCanvas(mapValueToCurrentField(1300)),
-    X_POS_PENALTY_CROSS : this.X_POS_SIDE_LINE - this.PENALTY_CROSS_X_DISTANCE,
-    GOAL_POST_RADIUS : mapValueToCurrentCanvas(mapValueToCurrentField(40)),
-    GOAL_POST_WIDTH : mapValueToCurrentCanvas(mapValueToCurrentField(1500)),
-    GOAL_POST_HEIGHT : mapValueToCurrentCanvas(mapValueToCurrentField(500)),
-    TARGET_RADIUS : mapValueToCurrentCanvas(mapValueToCurrentField(100)),
-    BALL_RADIUS : mapValueToCurrentCanvas(mapValueToCurrentField(100)),
-    ROBOT_RADIUS : mapValueToCurrentCanvas(mapValueToCurrentField(150)),
-    OBSTACLE_RADIUS : this.ROBOT_RADIUS,
-}
+    GOAL_POST_RADIUS: mapValueToCurrentCanvas(mapValueToCurrentField(50)),
+    GOAL_POST_WIDTH: mapValueToCurrentCanvas(mapValueToCurrentField(1500)),
+    GOAL_POST_HEIGHT: mapValueToCurrentCanvas(mapValueToCurrentField(500)),
+
+    TARGET_RADIUS: mapValueToCurrentCanvas(mapValueToCurrentField(150)),
+    BALL_RADIUS: mapValueToCurrentCanvas(mapValueToCurrentField(150)),
+    ROBOT_RADIUS: mapValueToCurrentCanvas(mapValueToCurrentField(200)),
+    OBSTACLE_RADIUS: mapValueToCurrentCanvas(mapValueToCurrentField(200)),
+};
 
 var fieldBackgroundColor = "#00FF00";
 var fieldLinesColor = "#00FF00";
@@ -108,9 +104,6 @@ function drawCircle(ctx, centerX, centerY, radius, fillColor = undefined, lineCo
         centerX = centerX + withRespectToCenter[0];
         centerY = centerY + withRespectToCenter[1];
     }
-
-    console.log(centerX)
-    console.log(centerY)
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
     
@@ -255,10 +248,6 @@ function drawField(canvas)
     drawLine(ctx, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
     drawLine(ctx, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE + FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
-    
-
-
-
     drawLine(ctx, FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.PENALTY_AREA_HEIGHT, -FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
     drawLine(ctx, -FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
@@ -269,15 +258,10 @@ function drawField(canvas)
     drawLine(ctx, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
     drawLine(ctx, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
-    drawCircle(ctx, 0, -FieldDimensions.PENALTY_AREA_HEIGHT/2-750, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawCircle(ctx, 0, -1300, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
-    drawLine(ctx, -FieldDimensions.X_POS_PENALTY_CROSS, FieldDimensions.PENALTY_CROSS_SIZE/2, -FieldDimensions.X_POS_PENALTY_CROSS, -FieldDimensions.PENALTY_CROSS_SIZE/2, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
-    drawLine(ctx, -FieldDimensions.X_POS_PENALTY_CROSS - FieldDimensions.PENALTY_CROSS_SIZE/2, 0, -FieldDimensions.X_POS_PENALTY_CROSS + FieldDimensions.PENALTY_CROSS_SIZE/2, 0, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
-
-    drawLine(ctx, FieldDimensions.X_POS_PENALTY_CROSS, FieldDimensions.PENALTY_CROSS_SIZE/2, FieldDimensions.X_POS_PENALTY_CROSS, -FieldDimensions.PENALTY_CROSS_SIZE/2, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
-    drawLine(ctx, FieldDimensions.X_POS_PENALTY_CROSS + FieldDimensions.PENALTY_CROSS_SIZE/2, 0, FieldDimensions.X_POS_PENALTY_CROSS - FieldDimensions.PENALTY_CROSS_SIZE/2, 0, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
-
-    drawCircle(ctx, 0, FieldDimensions.PENALTY_AREA_HEIGHT/2+750, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    
+    drawCircle(ctx, 0, 1300, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
         
     drawRectangle(ctx, -FieldDimensions.GOAL_POST_WIDTH/2,-FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.GOAL_POST_HEIGHT, FieldDimensions.GOAL_POST_WIDTH, FieldDimensions.GOAL_POST_HEIGHT, "#CCCCCC", "#FFFFFF", 1, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2])
     drawLine(ctx, -FieldDimensions.GOAL_POST_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.GOAL_POST_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.GOAL_POST_HEIGHT, "#FFFFFF", FieldDimensions.GOAL_POST_RADIUS/2, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
@@ -299,8 +283,8 @@ function scaleFieldPositionToCanvas(canvas, xFieldPos, yFieldPos)
 {
     var boundingRect = canvas.getBoundingClientRect();
 
-    var unscaledMouseXOnCanvas = Math.round(Utils.mapValue(xFieldPos, 0, canvas.height, -Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2), Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2)));
-    var unscaledMouseYOnCanvas = Math.round(Utils.mapValue(yFieldPos, 0, canvas.width, -Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2), Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2)));
+    var unscaledMouseXOnCanvas = Math.round(Utils.mapValue(xFieldPos, 0, canvas.width, -Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2), Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2)));
+    var unscaledMouseYOnCanvas = Math.round(Utils.mapValue(yFieldPos, 0, canvas.height, -Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2), Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2)));
 
     return [unscaledMouseXOnCanvas, unscaledMouseYOnCanvas]
 
@@ -317,10 +301,10 @@ function scaleMousePositionToField(canvas, xPos, yPos)
     var mouseXOnCanvas = Math.round((xPos - boundingRect.left) * scaleX);  
     var mouseYOnCanvas = Math.round((yPos - boundingRect.top) * scaleY);     
 
+    var scaledMouseXOnCanvas = -Math.round(Utils.mapValue(mouseYOnCanvas, -Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2), Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2), 0, canvas.height));
     var scaledMouseYOnCanvas = Math.round(Utils.mapValue(mouseXOnCanvas, -Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2), Math.floor(CURRENT_CANVAS_FIELD_WIDTH/2), 0, canvas.width));
-    var scaledMouseXOnCanvas = Math.round(Utils.mapValue(mouseYOnCanvas, -Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2), Math.floor(CURRENT_CANVAS_FIELD_HEIGHT/2), 0, canvas.height));
 
-    return [-scaledMouseXOnCanvas, scaledMouseYOnCanvas]
+    return [scaledMouseXOnCanvas, scaledMouseYOnCanvas]
 }
 
 function viewportMouseToCanvasCoordinates(canvas, xPos, yPos)
@@ -331,32 +315,35 @@ function viewportMouseToCanvasCoordinates(canvas, xPos, yPos)
     return [(xPos - boundingRect.left) * scaleX, (yPos - boundingRect.top) * scaleY];
 }
 
-function drawRobot(ctx, robotNumber, angle, xPos, yPos, isActiveRobot = false, isActiveTeammateRobot = false)
-{
-    var fillColor = "#AAAAAA";
+function transformCoordinates(x_pos, y_pos) {
+    var x_pos_robocup_field = -y_pos;
+    var y_pos_robocup_field = -x_pos;
+    return {
+        x_pos_robocup_field: x_pos_robocup_field,
+        y_pos_robocup_field: y_pos_robocup_field
+    };
+}
+
+function drawRobot(ctx, robotNumber, angle, xPos, yPos, isActiveRobot = false, isActiveTeammateRobot = false) {
+    var fillColor = "#A31621";
     var lineColor = "#000000";
 
-    if(isActiveRobot || isActiveTeammateRobot)
-    {
-        fillColor = "#00FF00";
+    if (isActiveRobot || isActiveTeammateRobot) {
+        fillColor = "#B68F40";
         lineColor = "#0000FF";
     }
+
     drawCircle(ctx, xPos, yPos, FieldDimensions.ROBOT_RADIUS, fillColor, lineColor, 
                 mapValueToCurrentCanvas(mapValueToCurrentField(20)), //border width 
                 [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
-    drawArrow(ctx, xPos, yPos, xPos+FieldDimensions.ROBOT_RADIUS*2*Math.cos(angle), yPos-FieldDimensions.ROBOT_RADIUS*2*Math.sin(angle), lineColor, 
-                mapValueToCurrentCanvas(mapValueToCurrentField(20)), //border width 
-                mapValueToCurrentCanvas(mapValueToCurrentField(50)), //arrow head length
-                [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
-    if(robotNumber == CONTROLLED_ROBOT) {
-        var labelRobot = "Controlled Robot" 
-    } else {
-        labelRobot = "Autonomous Robot"
-    }
+
+    
+    var labelRobot = robotNumber == CONTROLLED_ROBOT ? "Controlled" : "Autonomous";
+
     drawTextLabel(ctx, 
                     xPos + FieldDimensions.ROBOT_RADIUS * 2, 
                     yPos - FieldDimensions.ROBOT_RADIUS * 1.5, labelRobot, "#0000FF", 95,
-                    [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2])
+                    [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 }
 
 function drawBall(ctx)
@@ -421,6 +408,7 @@ function
 drawObstacles(ctx)
 {
     console.log("START")
+    
     for(var obs of obstaclesPositions)
     {
         drawCircle(ctx, 
@@ -448,8 +436,8 @@ function drawObjects(canvas)
     {
         drawRobot(ctx, robotNumber, 
                     robotPosition[0], 
+                    Utils.mapValue(robotPosition[1], -CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_WIDTH/2, -CURRENT_CANVAS_FIELD_WIDTH/2, CURRENT_CANVAS_FIELD_WIDTH/2),
                     Utils.mapValue(robotPosition[2], -CANVAS_FIELD_HEIGHT/2, CANVAS_FIELD_HEIGHT/2, -CURRENT_CANVAS_FIELD_HEIGHT/2, CURRENT_CANVAS_FIELD_HEIGHT/2), 
-                    Utils.mapValue(-robotPosition[1], -CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_WIDTH/2, -CURRENT_CANVAS_FIELD_WIDTH/2, CURRENT_CANVAS_FIELD_WIDTH/2),
                     robotNumber == CONTROLLED_ROBOT, robotNumber == AUTONOMOUS_ROBOT)
     };
     drawObstacles(ctx)
@@ -508,6 +496,11 @@ function sendNewTask(selectedRobot, taskType, taskLabel, selectionMode, strategy
     }
 }
 
+function removeTask(taskId)
+{
+    sendToWebSocket("Undo:"+taskId);
+}
+
 //--------------
 //| WEBSOCKET  |
 //--------------
@@ -550,112 +543,131 @@ function disableClient(reason)
 
 }
 
-function createTaskAssignmentButton(tab, taskLabel, taskType, selectionMode) {
-
-    var outerDiv = document.createElement("DIV");
-    outerDiv.classList.add("settings-horizontal-container")
-    outerDiv.style.height = "18%";
-
-    var middleDiv = document.createElement("DIV");  
-    middleDiv.classList.add("settings-horizontal-container")  
-    middleDiv.style.height = "80%";
+function createTaskAssignmentButton(tab, taskLabel, taskType, selectionMode, larghezza, taskLabel1, taskType1) {
+    var outerDiv = createContainer("18%");
+    var middleDiv = createContainer("80%");
     outerDiv.appendChild(middleDiv);
     
-    var innerDiv = document.createElement("DIV");   
-    innerDiv.classList.add("settings-horizontal-container")        
-    innerDiv.style.height = "100%";
-    innerDiv.style.width = "100%";     
-    innerDiv.style.justifyContent = "space-around"; 
-    middleDiv.appendChild(innerDiv);
-              
-    var btn = document.createElement("BUTTON");
-    btn.classList.add("settings-horizontal-container")
-    btn.innerHTML = taskLabel;
-    btn.taskLabel = taskLabel;
-    btn.taskType = taskType;
-    btn.selectionMode = selectionMode;
+    if (larghezza) {
+        middleDiv.style.display = "flex"; // Set middleDiv as flex container
+        middleDiv.style.justifyContent = "space-around"; // Distribute space around items
+        var innerDiv1 = createContainer("100%", "48%"); // Adjust width for each inner div
+        var innerDiv2 = createContainer("100%", "48%");
+        middleDiv.appendChild(innerDiv1);
+        middleDiv.appendChild(innerDiv2);
 
-    btn.onmousedown = function(e){
-        var canvas = document.getElementById("field-canvas");
+        var btn1 = createButton(taskLabel , taskType, selectionMode);
+        var btn2 = createButton(taskLabel1, taskType1, selectionMode);
+        innerDiv1.appendChild(btn1);
+        innerDiv2.appendChild(btn2);
+    } else {
+        var innerDiv = createContainer("100%", "100%");
+        innerDiv.style.justifyContent = "space-around";
+        middleDiv.appendChild(innerDiv);
         
-        //Unselect the other selected task button if there is one
-        if(canvas.currentlySelectedTaskButton != undefined)
-        {
-            toggleButton(canvas.currentlySelectedTaskButton)
-            toggleTaskButtonSelection(canvas.currentlySelectedTaskButton);
-        }
-        
-        if(selectionMode === "noSelection")
-        {
-            toggleButton(e.target)
-            setTimeout(function () {toggleButton(e.target)}, 200)
-            sendNewTask(CONTROLLED_ROBOT, btn.taskType, taskLabel, "noSelection", strategySelected);               
-        }
-        else
-        {
-            toggleButton(e.target);
-            toggleTaskButtonSelection(e.target);
-        }
-    };
-
-    innerDiv.appendChild(btn);               
+        var btn = createButton(taskLabel, taskType, selectionMode);
+        innerDiv.appendChild(btn);
+    }
 
     var tasksTab = document.getElementById(tab);
     tasksTab.appendChild(outerDiv);               
 }
 
-function createStrategyAssignmentButton(tab, strategyLabel, strategyNumber, selectionMode) {
+function createContainer(height, width = "100%") {
+    var div = document.createElement("DIV");
+    div.classList.add("settings-horizontal-container");
+    div.style.height = height;
+    div.style.width = width;
+    return div;
+}
 
-    var outerDiv = document.createElement("DIV");
-    outerDiv.classList.add("settings-horizontal-container")
-    outerDiv.style.height = "18%";
-
-    var middleDiv = document.createElement("DIV");  
-    middleDiv.classList.add("settings-horizontal-container")  
-    middleDiv.style.height = "80%";
-    outerDiv.appendChild(middleDiv);
-    
-    var innerDiv = document.createElement("DIV");   
-    innerDiv.classList.add("settings-horizontal-container")        
-    innerDiv.style.height = "100%";
-    innerDiv.style.width = "100%";     
-    innerDiv.style.justifyContent = "space-around"; 
-    middleDiv.appendChild(innerDiv);
-              
+function createButton(taskLabel, taskType, selectionMode) {
     var btn = document.createElement("BUTTON");
-    btn.classList.add("settings-horizontal-container")
-    btn.innerHTML = strategyLabel;
+    btn.classList.add("settings-horizontal-container");
+    btn.innerHTML = taskLabel;
+    btn.taskLabel = taskLabel;
+    btn.taskType = taskType;
+    btn.selectionMode = selectionMode;
+
+    btn.onmousedown = function(e) {
+        var canvas = document.getElementById("field-canvas");
+
+        // Check if the clicked button is the currently selected one
+        if (canvas.currentlySelectedTaskButton === btn) {
+            toggleButton(btn);
+            toggleTaskButtonSelection(btn);
+            return;
+        }
+
+        // Unselect the other selected task button if there is one
+        if (canvas.currentlySelectedTaskButton !== undefined) {
+            toggleButton(canvas.currentlySelectedTaskButton);
+            toggleTaskButtonSelection(canvas.currentlySelectedTaskButton);
+        }
+
+        if (selectionMode === "noSelection") {
+            toggleButton(e.target);
+            setTimeout(function () {
+                toggleButton(e.target);
+            }, 200);
+            sendNewTask(CONTROLLED_ROBOT, btn.taskType, taskLabel, "noSelection", strategySelected);               
+        } else {
+            toggleButton(e.target);
+            toggleTaskButtonSelection(e.target);
+        }
+    };
+
+    return btn;
+}
+
+function createStrategyButton(label, strategyNumber, selectionMode) {
+    var btn = document.createElement("BUTTON");
+    btn.classList.add("settings-horizontal-container");
+    btn.innerHTML = label;
     btn.strategyNumber = strategyNumber;
     btn.selectionMode = selectionMode;
 
     btn.onmousedown = function(e) {
+        var canvas = document.getElementById("field-canvas"); // Ensure the canvas is defined
+
         if (canvas.currentlySelectedStrategyButton === e.target) {
             // If the currently selected button is the same as the clicked button, deselect it
             toggleButton(e.target);
-            toggleStrategyButtonSelection(e.target);
             canvas.currentlySelectedStrategyButton = undefined;
             strategySelected = 0;
         } else {
             if (canvas.currentlySelectedStrategyButton != undefined) {
                 // Deselect the previously selected button
                 toggleButton(canvas.currentlySelectedStrategyButton);
-                toggleStrategyButtonSelection(canvas.currentlySelectedStrategyButton);
             }
             // Select the new button
             strategySelected = strategyNumber;
             toggleButton(e.target);
-            toggleStrategyButtonSelection(e.target);
             // Update the currently selected button
             canvas.currentlySelectedStrategyButton = e.target;
         }
     };
-    innerDiv.appendChild(btn);               
 
-    var tasksTab = document.getElementById(tab);
-    tasksTab.appendChild(outerDiv);               
+    return btn;
 }
 
-function createTableTask(tabId, id, strategy, task, undoButton) {
+function createStrategyAssignmentButton(tab, strategyLabel, strategyNumber, selectionMode) {
+    var outerDiv = createContainer("18%");
+    var middleDiv = createContainer("80%");
+    outerDiv.appendChild(middleDiv);
+
+    var innerDiv = createContainer("100%");
+    innerDiv.style.justifyContent = "space-around";
+    middleDiv.appendChild(innerDiv);
+
+    var btn = createStrategyButton(strategyLabel, strategyNumber, selectionMode);
+    innerDiv.appendChild(btn);
+
+    var tasksTab = document.getElementById(tab);
+    tasksTab.appendChild(outerDiv);
+}
+
+function createTableTask(tabId, id, taskID, strategy, task, undoButton) {
     var tab = document.getElementById(tabId);
 
     var outerDiv = document.createElement("DIV");
@@ -672,13 +684,13 @@ function createTableTask(tabId, id, strategy, task, undoButton) {
     labelDiv1.classList.add("column");
     labelDiv1.innerHTML = id;
     labelDiv1.style.flex = "1";
-    labelDiv1.style.fontSize = "1.0vw"; // Cambiato da 1.0em a 1.0vw
+    labelDiv1.style.fontSize = "1.0vw";
 
     var labelDiv2 = document.createElement("DIV");
     labelDiv2.classList.add("column");
     labelDiv2.innerHTML = "Strategy " + strategy;
     labelDiv2.style.flex = "4";
-    labelDiv2.style.fontSize = "1.0vw"; // Cambiato da 1.0em a 1.0vw
+    labelDiv2.style.fontSize = "1.0vw";
 
     var labelDiv3 = document.createElement("DIV");
     labelDiv3.classList.add("column");
@@ -695,7 +707,9 @@ function createTableTask(tabId, id, strategy, task, undoButton) {
     buttonDiv1.appendChild(button1);
 
     button1.addEventListener("click", function() {
-        sendNewTask(CONTROLLED_ROBOT, task, "taskLabel", "noSelection", strategySelected);         
+        currentTaskList.splice(id - 1, 1);
+        updateTaskTable(tabId);
+        removeTask(taskID);
     });
 
     outerDiv.appendChild(labelDiv1);
@@ -704,6 +718,16 @@ function createTableTask(tabId, id, strategy, task, undoButton) {
     outerDiv.appendChild(buttonDiv1);
 
     tab.appendChild(outerDiv);
+}
+
+
+function updateTaskTable(tabId) {
+    var tab = document.getElementById(tabId);
+    tab.innerHTML = ''; 
+
+    currentTaskList.forEach((task, index) => {
+        createTableTask(tabId, task.taskID, task.taskID, task.strategy, task.taskType, 'Undo');
+    });
 }
 
 
@@ -768,10 +792,11 @@ function enableClient()
     //STOP BUTTON
     createTaskAssignmentButton("tasks-tab3", "Stop", "Stop", "noSelection")
     
-    //LOOK LEFT AND RIGHT
-    createTaskAssignmentButton("tasks-tab4", "Look left", "LookLeft", "noSelection")
-    createTaskAssignmentButton("tasks-tab4", "Look right", "LookRight", "noSelection")
+    //LOOK LEFT AND RIGHT SCAN
+    createTaskAssignmentButton("tasks-tab4", "Look left", "LookLeft", "noSelection", true, "Look right", "LookRight")
+    createTaskAssignmentButton("tasks-tab4", "Scan", "Scan", "noSelection", false)
     
+
     //STRATEGY BUTTON
     createStrategyAssignmentButton("tasks-tab5", "Strategy 1", 1, "noSelection")
     createStrategyAssignmentButton("tasks-tab5", "Strategy 2", 2, "noSelection")
@@ -873,17 +898,17 @@ function setupSocket(webSocket)
         packetsLabel.textContent = "Packets Left: " + packets;
     }
 
-    function addTask(taskType, taskID, parameters = undefined)
+    function addTask(taskType, taskID, strategy, parameters = undefined)
     {
-        createTaskPreview(taskType, taskID, parameters)
         if(parameters == undefined)
         {
-            currentTaskList.push({taskType : taskType, taskID : taskID})
+            currentTaskList.push({taskType : taskType, taskID : taskID, strategy : strategy})
         }
         else
         {
-            currentTaskList.push({taskType : taskType, taskID : taskID, parameters : parameters})
+            currentTaskList.push({taskType : taskType, taskID : taskID, strategy : strategy, parameters : parameters})
         }
+        updateTaskTable('taskCanvas');
     }
 
     webSocket.onmessage = function (message) {
@@ -914,77 +939,70 @@ function setupSocket(webSocket)
                 startRenderingLoop()
             }
 
-            if(message_content.startsWith("timeleft")) {
-                tempoRimanente =  message_content.split(":")[1]
-                updateTimeLabel(tempoRimanente);
-            }
-
-            if(message_content.startsWith("score")) {
-                score =  message_content.split(":")[1]
-                updateScoreLabel(score);
-            }
-
-            if(message_content.startsWith("packets-left")) {
-                packets_left =  message_content.split(":")[1]
-                updatePacketsLabel(packets_left);
-            }
-            
-            if(message_content.startsWith("robotAutonomousAndControlled"))
-            {
-                var message_fields = message_content.split(":")[1].split(";")
-                for (var field of message_fields) {
-                    var obsCoords = field.split(",")
-                    robotNumber = parseInt(obsCoords[0]);
-
-                    robotNumbersToPositions[robotNumber] = [
-                        parseFloat(obsCoords[1]), 
-                        Math.floor(parseFloat(obsCoords[2])), 
-                        -Math.floor(parseFloat(obsCoords[3]))
-                    ];
-                }
-            }
-
-            if(message_content.startsWith("robotPos"))
-            {
-                var field = message_content.split(":")[1]
-                obsCoords = field.split(",")
-                console.log(obsCoords)
-                robotNumber = parseInt(obsCoords[0]);
-                robotNumbersToPositions[robotNumber] = [
-                    parseFloat(obsCoords[1]+Math.PI), 
-                    Math.floor(parseFloat(obsCoords[2])), 
-                    -Math.floor(parseFloat(obsCoords[3]))
-                ];
-            }
-            
-            else if(message_content.startsWith("ballPosition"))
-            {
-                message_content = message_content.split(":")[1]
-                var message_fields = message_content.split(",")
-
-                //NOTICE: the y coordinate is inverted
-                ballPosition = [Math.floor(parseFloat(message_fields[0])), -Math.floor(parseFloat(message_fields[1]))]
-            }
-            else if(message_content.startsWith("obstacles"))
-            {
-                var message_fields = message_content.split(":")[1].split(";")
-                obstaclesPositions = []
-                for(var field of message_fields)
-                {
-                    var obsCoords = field.split(",")
-                    
-                    //NOTICE: the y coordinate is inverted
-                    obstaclesPositions.push([Math.floor(parseFloat(obsCoords[0])), -Math.floor(parseFloat(obsCoords[1]))])
-                }              
-            }
-            else if(message_content.startsWith("lastReceivedTask")) {
-                lastReceivedTaskID += 1
-                message_content = message_content.split(":")[1]
-                var message_fields = message_content.split(",")
-                createTableTask("taskCanvas", message_fields[0], strategySelected, message_fields[1], "undo")
-            }    
+            switchMessageContent(message_content);
         }
     };
+}
+
+function switchMessageContent(message_content) {
+
+    if(message_content.startsWith("timeLeft")) {
+        tempoRimanente =  message_content.split(":")[1]
+        updateTimeLabel(tempoRimanente);
+    }
+
+    if(message_content.startsWith("score")) {
+        score =  message_content.split(":")[1]
+        updateScoreLabel(score);
+    }
+
+    if(message_content.startsWith("packetsLeft")) {
+        packets_left =  message_content.split(":")[1]
+        updatePacketsLabel(packets_left);
+    }
+
+    if(message_content.startsWith("robotPos")) {
+        var field = message_content.split(":")[1]
+        obsCoords = field.split(",")
+        console.log(obsCoords)
+        robotNumber = parseInt(obsCoords[0]);
+        robotNumbersToPositions[robotNumber] = [
+            parseFloat(obsCoords[1]+Math.PI), 
+            Math.floor(parseFloat(obsCoords[2])), 
+            -Math.floor(parseFloat(obsCoords[3]))
+        ];
+    }
+
+    if(message_content.startsWith("ballPos")) {
+        message_content = message_content.split(":")[1]
+        var message_fields = message_content.split(",")
+        var transformedCoordinates = transformCoordinates(message_fields[0], message_fields[1]);
+        var xPos = transformedCoordinates.x_pos_robocup_field;
+        var yPos = transformedCoordinates.y_pos_robocup_field;
+        ballPosition = [Math.floor(parseFloat(xPos)), Math.floor(parseFloat(yPos))]
+    }
+
+    if(message_content.startsWith("obstacles")){
+        var message_fields = message_content.split(":")[1].split(";")
+        obstaclesPositions = []
+        for(var field of message_fields)
+        {
+            var obsCoords = field.split(",")
+            var transformedCoordinates = transformCoordinates(obsCoords[0], obsCoords[1]);
+            var xPos = transformedCoordinates.x_pos_robocup_field;
+            var yPos = transformedCoordinates.y_pos_robocup_field;    
+            //NOTICE: the y coordinate is inverted
+            obstaclesPositions.push([Math.floor(parseFloat(xPos)), Math.floor(parseFloat(yPos))])
+        }              
+    }
+
+    if(message_content.startsWith("lastReceivedTask")) {
+        lastReceivedTaskID += 1
+        message_content = message_content.split(":")[1]
+        var message_fields = message_content.split(",")
+        addTask(message_fields[1], message_fields[0], message_fields[2])
+        //createTableTask("taskCanvas", message_fields[0], strategySelected, message_fields[1], "undo")
+    } 
 }
 
 //Taken from https://stackoverflow.com/questions/13546424/how-to-wait-for-a-websockets-readystate-to-change

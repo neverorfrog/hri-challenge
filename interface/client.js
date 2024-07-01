@@ -135,7 +135,7 @@ var backend_keepalive_send_timeout;
 function requestKeepaliveToBackend() {
     
   //console.log("[FRONTEND; KEEPALIVE] Requesting keepalive to backend")
-  // send_registration_message_to_backend()
+  //send_registration_message_to_backend()
 
   //Set a timeout to be cleared in case a keepalive is received
   backend_keepalive_receive_timeout = setTimeout(function () {
@@ -255,25 +255,23 @@ webSocket.on('request', function(request) {
         {
           try{
             //console.log(message_content)
-            // write_socket.send(generateHeader() + message_content, 65300, LOCAL_BACKEND_IP, (err) => {});
+            //write_socket.send(generateHeader() + message_content, 65300, LOCAL_BACKEND_IP, (err) => {});
           } catch {}
           //console.log(obstaclesPositions)
           //console.log("[FRONTEND; KEEPALIVE] Received keepalive from client (ID: "+receivedClientID+"). Sending response.")
           receivedConnection.sendUTF(generateWebSocketHeader() + "yeah")
         }
-        else if(message_content.startsWith("strategyType")) {
-          var message_fields = message_content.split(":")[1].split(",")
-
-          var strategyType = message_fields[2]
-          var strategyID = message_fields[3]
-          
+        else if(message_content.startsWith("Undo")) {
+          var message_fields = message_content.split(":")[1]
+          console.log(message_fields)
           try{
             //console.log(generateHeader() + message_content)
-            console.log(generateWebSocketHeader() + "lastReceivedStrategy:" + strategyID)
-            currentConnection.sendUTF(generateWebSocketHeader() + "lastReceivedStrategy:" + strategyID + "," + strategyType)
+            console.log(generateWebSocketHeader() + "Undo:" + message_fields)
+            //currentConnection.sendUTF(generateWebSocketHeader() + "lastReceivedStrategy:" + strategyID + "," + strategyType)
             //write_socket.send(generateHeader() + message_content, 65300, LOCAL_BACKEND_IP, (err) => {});
           } catch {}
         }
+        
         else if(message_content.startsWith("taskType"))
         {
           //console.log(message_content)
@@ -298,7 +296,7 @@ webSocket.on('request', function(request) {
           try{
             //console.log(generateHeader() + message_content)
             console.log(generateWebSocketHeader() + "lastReceivedTask:" + taskID + taskType)
-            currentConnection.sendUTF(generateWebSocketHeader() + "lastReceivedTask:" + taskID + "," + taskType)
+            currentConnection.sendUTF(generateWebSocketHeader() + "lastReceivedTask:" + taskID + "," + taskType + "," + strategySelected)
             write_socket.send(generateHeader() + message_content, 65300, LOCAL_BACKEND_IP, (err) => {});
           } catch {}
           

@@ -1,10 +1,10 @@
-- [ ] Implementare la carta di default
-  - [ ] Scan
+- [x] Implementare la carta di default
+  - [x] Scan
 - [ ] Mandare l'immagine della upper dal nao e stamparla
 - [ ] Plot del pacchetto di debug
-  - [ ] Posizione del robot controllato
+  - [x] Posizione del robot controllato
   - [ ] Posizione degli ostacoli (incluso robot autonomo)
-  - [ ] Posizione della palla
+  - [x] Posizione della palla
 - [ ] Informazioni di interfaccia dal pacchetto di debug
   - [ ] Score
   - [ ] Packets left

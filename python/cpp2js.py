@@ -30,13 +30,13 @@ class Cpp2Js(threading.Thread):
             debug_packet = self.receive_from_cpp()
 
             # Robot pose
-            pos_x = debug_packet[DataEntryIndex.PosX.value]
-            pos_y = debug_packet[DataEntryIndex.PosY.value]
+            pos_x = -debug_packet[DataEntryIndex.PosY.value]
+            pos_y = debug_packet[DataEntryIndex.PosX.value]
             theta = debug_packet[DataEntryIndex.Theta.value]
             robot_number = debug_packet[DataEntryIndex.PlayerNum.value]
             print("RobotNumber: ", robot_number)
             print("Pose: ", pos_x, pos_y, theta)
-            pose_controlled = f"4,{theta},{pos_x},{pos_y}"
+            pose_controlled = f"3,{theta},{pos_x},{pos_y}"
             pose_controlled_message = f"|robotPos:{pose_controlled}"
             self.send_sock_js.sendto(pose_controlled_message.encode(), (self.config.UDP_IP_JS, self.config.UDP_SEND_PORT_JS))
 
@@ -45,7 +45,7 @@ class Cpp2Js(threading.Thread):
             ballpos_y = debug_packet[DataEntryIndex.BallPosY.value]
             print("BallPos: ", ballpos_x, ballpos_y)
             ball_position = f"{ballpos_x},{ballpos_y}"
-            ball_position_message = f"|ballPosition:{ball_position}"
+            ball_position_message = f"|ballPos:{ball_position}"
             self.send_sock_js.sendto(ball_position_message.encode(), (self.config.UDP_IP_JS, self.config.UDP_SEND_PORT_JS))
 
                 

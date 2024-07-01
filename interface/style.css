@@ -102,17 +102,6 @@ h3 {
     font-size: 1.4vw;
 }
 
-#taskContainer {
-    width: 30%;
-    height: 100%;
-    background-color: #d6d3d3;
-    overflow-y: scroll;
-}
-
-#taskContainer h1 {
-    text-align: center;
-    font-size: 2vw;
-}
 
 #canvas-container {
     overflow: hidden;
@@ -170,7 +159,7 @@ h3 {
 }
 
 #tasks-tab4 {
-    top: 53%;
+    top: 55%;
     width: 100%;
     border: 0.3vw solid gray;
     height: 40%;
@@ -232,7 +221,7 @@ h3 {
     color: rgb(0, 0, 0);
     text-align: center;
     display: block;
-    font-size: 1.3vw;
+    font-size: 1.2vw;
     font-family: inherit;
     border-radius: 0;
     position: relative;
@@ -243,84 +232,33 @@ h3 {
     background-color: #f40000;
 }
 
-#textureImage {
-    width: 100%;
-    border: grey 1px solid;
-}
-
-input[type=range] {
-    position: relative;
-    display: block;
-    mask-image: none;
-    width: 60%;
-    height: 20%;
-    background: #d3d3d3;
-    outline: none;
-
-}
-
-.vertical_sliders_container {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    position: absolute;
-
-}
-
-.touchpad-outer-container {
-    position: relative;
-    width: 100%;
-    height: 300px;
-    border: 2px solid #333;
-    background-color: #ccc;
-    user-select: none;
-    touch-action: none;
-}
-
-.touchpad-inner-container {
-    width: 100%;
-    height: 100%;
-}
-
-input[type=range][orient=vertical] {
-    height: 0.6vw;
-    width: 100%;
-    transform: rotateZ(270deg);
-    -moz-transform: rotate(270deg);
-}
-
-input[type=range][orient=vertical]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20%;
-    height: 2.0vw;
-    background: #4CAF50;
-    cursor: pointer;
-    border: solid 0.1vw #d3d3d3;
-    border-radius: 0.8vw;
-}
-
-
-input[type=range][orient=vertical]::-moz-range-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20%;
-    height: 2.0vw;
-    background: #4CAF50;
-    cursor: pointer;
-    border: solid 0.1vw #d3d3d3;
-    border-radius: 0.8vw;
-}
-
-
 .container {
     display: flex;
     align-items: center;
 }
 
 
-#taskCanvas {
+#taskContainer {
     display: flex;
     flex-direction: column;
+    width: 30%;
+    height: 100%;
+    background-color: #d6d3d3;
 }
 
+#taskContainer h1 {
+    text-align: center;
+    font-size: 2vw;
+    margin-top: 0.6vw; 
+}
+
+#taskCanvas {
+    flex: 1;
+    width: 100%;
+    overflow-y: scroll;
+}
+
+#imageDiv {
+    height: 35%;
+    background-color: #d6d3d3;
+}

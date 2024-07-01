@@ -41,7 +41,24 @@ class DataEntryIndex(Enum):
     BallPosY = 11
     PlayerRole = 12
     NumDataBytes = 13
-    Padding = 14
+    CurrentObstacleSize = 14
+    ObstacleTypes = 15
+    ObstacleCenters = 21
+    ObstacleLeft = 33
+    ObstacleRight = 45
+    MessageBudget = 57
+    SecsRemaining = 58
+    Padding = 59
+    
+class ObstacleType(Enum):
+    Goalpost = 0
+    Unknown = 1
+    SomeRobot = 2
+    Opponent = 3
+    Teammate = 4
+    FallenSomeRobot = 5
+    FallenOpponent = 6
+    FallenTeammate = 7
     
 def get_my_ip_address():
     ip_address = "Unable to get IP address"

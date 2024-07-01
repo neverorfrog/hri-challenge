@@ -12,3 +12,6 @@
   - [ ] Ultima volta che ho visto la palla
 - [ ] Scenario in difesa
   - [ ] Plottare linee di congiunzione?
+- [ ] Obstacles
+  - [ ] Vengono valori enormi su alcune posizioni degli ostacoli
+  - [ ] Il numero di ostacoli e la lista di tipi di ostacoli non sono consistenti (mostra obstacles size a 1, ma i primi quattro tipo di obstacle types sono 2, il che vuol dire che qualcosa sta vedendo?)

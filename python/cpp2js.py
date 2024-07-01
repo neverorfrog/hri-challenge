@@ -47,9 +47,23 @@ class Cpp2Js(threading.Thread):
             ball_position = f"{ballpos_x},{ballpos_y}"
             ball_position_message = f"|ballPos:{ball_position}"
             self.send_sock_js.sendto(ball_position_message.encode(), (self.config.UDP_IP_JS, self.config.UDP_SEND_PORT_JS))
+            
+            # Time left
+            time_left = debug_packet[DataEntryIndex.SecsRemaining.value]
+            print("Time left: ", time_left)
+            time_left_message = f"|timeLeft:{time_left}"
+            self.send_sock_js.sendto(time_left_message.encode(), (self.config.UDP_IP_JS, self.config.UDP_SEND_PORT_JS))
+            
+            # Obstacles
+            index = DataEntryIndex.ObstacleTypes.value
+            obstacle_size = debug_packet[DataEntryIndex.CurrentObstacleSize.value]
+            obstacles_types = debug_packet[index:index+6] # TODO hardcodato
+            print("Number of obstacles: ", obstacle_size)
+            print("Obstacle types: ", obstacles_types)
 
                 
-    def receive_from_cpp(self):
+    def receive_from_cpp(self) -> struct:
+        debug_packet = None
         try:    
             data, addr = self.receive_sock_cpp.recvfrom(1024)
         except Exception as e:

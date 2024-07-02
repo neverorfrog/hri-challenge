@@ -28,11 +28,12 @@ command_format: "<BBBff"
 # 12)     1B playerRole
 # 13)     1B numOfDataBytes
 # 14)     1B currentObsSize
-# 15-21)  6B obstacleTypes  
-# 21-33)  12f (24B) obsCenters
-# 33-45)  12f (24B) obsLeft
-# 45-57)  12f (24B) obsRight
-# 57)     1H (2B) messageBudget
-# 58)     1H (2B) secsRemaining
-# 59-62)  3B di padding
-data_format: "<d4sBBBB3ff2fBBB6B12f12f12fHH3B"
+# 15)     1B padding
+# 16-22)  6B obstacleTypes  
+# 22-24)  2B padding
+# 24-36)  12f (24B) obsCenters
+# 36-48)  12f (24B) obsLeft
+# 48-60)  12f (24B) obsRight
+# 61)     1H (2B) messageBudget
+# 62)     1H (2B) secsRemaining
+data_format: "<d4sBBBB3ff2fBBBB6B2B12f12f12fHH"

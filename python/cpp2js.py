@@ -58,8 +58,11 @@ class Cpp2Js(threading.Thread):
             index = DataEntryIndex.ObstacleTypes.value
             obstacle_size = debug_packet[DataEntryIndex.CurrentObstacleSize.value]
             obstacles_types = debug_packet[index:index+6] # TODO hardcodato
+            index = DataEntryIndex.ObstacleCenters.value
+            obstacle_positions = debug_packet[index:index+12]
             print("Number of obstacles: ", obstacle_size)
             print("Obstacle types: ", obstacles_types)
+            print("Obstacle positions: ", obstacle_positions)
 
                 
     def receive_from_cpp(self) -> struct:

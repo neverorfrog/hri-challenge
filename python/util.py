@@ -42,13 +42,13 @@ class DataEntryIndex(Enum):
     PlayerRole = 12
     NumDataBytes = 13
     CurrentObstacleSize = 14
-    ObstacleTypes = 15
-    ObstacleCenters = 21
-    ObstacleLeft = 33
-    ObstacleRight = 45
-    MessageBudget = 57
-    SecsRemaining = 58
-    Padding = 59
+    ObstacleTypes = 16
+    ObstacleCenters = 24
+    ObstacleLeft = 36
+    ObstacleRight = 48
+    MessageBudget = 60
+    SecsRemaining = 61
+    Padding = 62
     
 class ObstacleType(Enum):
     Goalpost = 0

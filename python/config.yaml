@@ -1,4 +1,4 @@
-UDP_IP_CPP: "0.0.0.0" # LUIGI IP Address
+UDP_IP_CPP: "10.0.19.26" # LUIGI IP Address
 MY_IP: "0.0.0.0" # MY IP Address
 UDP_IP_JS: "0.0.0.0" # JAVASCRIPT IP Address
 
@@ -16,13 +16,24 @@ command_offset: 10
 # 8B [pos_x, pos_y]
 command_format: "<BBBff" 
 
-# 1 double di qualcosa
-# 4B di header
-# 4B [versione, player_num, team_num, fallen]
-# 12B [pos_x, pos_y, theta]
-# 4B [ball_age]
-# 8B [ball_x, ball_y]
-# 1B di player_role
-# 1B di num_data_bytes
-# 1 short di padding
-data_format: "<d4sBBBBffffffBBh"
+# 0)      1 double di qualcosa
+# 1)      4B header
+# 2)      1B versione
+# 3)      1B playerNum
+# 4)      1B teamNum
+# 5)      1B fallen
+# 6-9)    3f (12B) [posX, posY, theta]
+# 9)      4B ballAge
+# 10-12)  8B [ballPosX, ballPosY]
+# 12)     1B playerRole
+# 13)     1B numOfDataBytes
+# 14)     1B currentObsSize
+# 15)     1B padding
+# 16-22)  6B obstacleTypes  
+# 22-24)  2B padding
+# 24-36)  12f (24B) obsCenters
+# 36-48)  12f (24B) obsLeft
+# 48-60)  12f (24B) obsRight
+# 61)     1H (2B) messageBudget
+# 62)     1H (2B) secsRemaining
+data_format: "<d4sBBBB3ff2fBBBB6B2B12f12f12fHH"

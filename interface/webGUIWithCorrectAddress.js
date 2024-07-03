@@ -38,11 +38,11 @@ var FIELD_WIDTH = Math.floor(CURRENT_FIELD_WIDTH * CANVAS_RESOLUTION_FACTOR);
 var FIELD_HEIGHT = Math.floor(CURRENT_FIELD_HEIGHT * CANVAS_RESOLUTION_FACTOR);
 
 function mapValueToCurrentField(value) {
-    return Utils.mapValue(value, 0, DEFAULT_CANVAS_FIELD_WIDTH, 0, DEFAULT_CANVAS_FIELD_WIDTH);
+    return Utils.mapValue(value, 0, DEFAULT_CANVAS_FIELD_HEIGHT, 0, DEFAULT_CANVAS_FIELD_HEIGHT);
 }
 
 function mapValueToCurrentCanvas(value) {
-    return Utils.mapValue(value, 0, CANVAS_FIELD_WIDTH, 0, CURRENT_CANVAS_FIELD_WIDTH);
+    return Utils.mapValue(value, 0, CANVAS_FIELD_HEIGHT, 0, CURRENT_CANVAS_FIELD_HEIGHT);
 }
 
 var FieldDimensions = {
@@ -57,6 +57,8 @@ var FieldDimensions = {
     PENALTY_AREA_WIDTH: mapValueToCurrentCanvas(mapValueToCurrentField(4000)),
     PENALTY_AREA_HEIGHT: mapValueToCurrentCanvas(mapValueToCurrentField(1650)),
 
+    PENALTY_MARK_DISTANCE: mapValueToCurrentCanvas(mapValueToCurrentField(1300)),
+
     SMALL_PENALTY_AREA_WIDTH: mapValueToCurrentCanvas(mapValueToCurrentField(2200)),
     SMALL_PENALTY_AREA_HEIGHT: mapValueToCurrentCanvas(mapValueToCurrentField(600)),
 
@@ -65,7 +67,7 @@ var FieldDimensions = {
     GOAL_POST_HEIGHT: mapValueToCurrentCanvas(mapValueToCurrentField(500)),
 
     TARGET_RADIUS: mapValueToCurrentCanvas(mapValueToCurrentField(150)),
-    BALL_RADIUS: mapValueToCurrentCanvas(mapValueToCurrentField(150)),
+    BALL_RADIUS: mapValueToCurrentCanvas(mapValueToCurrentField(120)),
     ROBOT_RADIUS: mapValueToCurrentCanvas(mapValueToCurrentField(200)),
     OBSTACLE_RADIUS: mapValueToCurrentCanvas(mapValueToCurrentField(200)),
 };
@@ -176,35 +178,6 @@ function drawLine(ctx, fromX, fromY, toX, toY, lineColor = "#000000", lineWidth 
     ctx.stroke();
 }
 
-//Taken from https://stackoverflow.com/questions/808826/draw-arrow-on-canvas-tag
-function drawArrow(ctx, fromX, fromY, toX, toY, lineColor = "#000000", lineWidth = 20, arrowHeadLength = 50, withRespectToCenter = undefined) 
-{
-    if(withRespectToCenter != undefined)
-    {
-        fromX = fromX + withRespectToCenter[0];
-        toX = toX + withRespectToCenter[0];
-
-        fromY = fromY + withRespectToCenter[1];
-        toY = toY + withRespectToCenter[1];
-    }
-    
-    var dx = toX - fromX;
-    var dy = toY - fromY;
-    var angle = Math.atan2(dy, dx);
-
-
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = lineColor;
-
-    ctx.beginPath();
-    ctx.moveTo(fromX, fromY);
-    ctx.lineTo(toX, toY);
-    ctx.lineTo(toX - arrowHeadLength * Math.cos(angle - Math.PI / 6), toY - arrowHeadLength * Math.sin(angle - Math.PI / 6));
-    ctx.moveTo(toX, toY);
-    ctx.lineTo(toX - arrowHeadLength * Math.cos(angle + Math.PI / 6), toY - arrowHeadLength * Math.sin(angle + Math.PI / 6));
-    ctx.stroke();
-}
-
 function drawRectangle(ctx, topLeftX, topLeftY, width, length, fillColor = undefined, lineColor = "#000000", lineWidth = 5, withRespectToCenter = undefined)
 {
     if(withRespectToCenter != undefined)
@@ -260,10 +233,10 @@ function drawField(canvas)
     drawLine(ctx, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
     drawLine(ctx, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE, FieldDimensions.SMALL_PENALTY_AREA_WIDTH/2, FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.SMALL_PENALTY_AREA_HEIGHT, "#FFFFFF", FieldDimensions.FIELD_LINES_WIDTH, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
-    drawCircle(ctx, 0, -1300, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawCircle(ctx, 0, -FieldDimensions.Y_POS_SIDE_LINE+FieldDimensions.PENALTY_MARK_DISTANCE, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 
     
-    drawCircle(ctx, 0, 1300, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawCircle(ctx, 0, FieldDimensions.Y_POS_SIDE_LINE-FieldDimensions.PENALTY_MARK_DISTANCE, FieldDimensions.GOAL_POST_RADIUS, "#FFFFFF", "FFFFFF", 5, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
         
     drawRectangle(ctx, -FieldDimensions.GOAL_POST_WIDTH/2,-FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.GOAL_POST_HEIGHT, FieldDimensions.GOAL_POST_WIDTH, FieldDimensions.GOAL_POST_HEIGHT, "#CCCCCC", "#FFFFFF", 1, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2])
     drawLine(ctx, -FieldDimensions.GOAL_POST_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE, -FieldDimensions.GOAL_POST_WIDTH/2, -FieldDimensions.Y_POS_SIDE_LINE - FieldDimensions.GOAL_POST_HEIGHT, "#FFFFFF", FieldDimensions.GOAL_POST_RADIUS/2, [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
@@ -327,11 +300,11 @@ function transformCoordinates(x_pos, y_pos) {
 }
 
 function drawRobot(ctx, robotNumber, angle, xPos, yPos, isActiveRobot = false, isActiveTeammateRobot = false) {
-    var fillColor = "#A31621";
+    var fillColor = "#AAAAAA";
     var lineColor = "#000000";
 
     if (isActiveRobot || isActiveTeammateRobot) {
-        fillColor = "#B68F40";
+        fillColor = "#00FF00";
         lineColor = "#0000FF";
     }
 
@@ -343,8 +316,8 @@ function drawRobot(ctx, robotNumber, angle, xPos, yPos, isActiveRobot = false, i
     var labelRobot = robotNumber == CONTROLLED_ROBOT ? "Controlled" : "Autonomous";
 
     drawTextLabel(ctx, 
-                    xPos + FieldDimensions.ROBOT_RADIUS * 2, 
-                    yPos - FieldDimensions.ROBOT_RADIUS * 1.5, labelRobot, "#0000FF", 95,
+                    xPos + FieldDimensions.ROBOT_RADIUS*0.25 , 
+                    yPos - FieldDimensions.ROBOT_RADIUS * 1.5, labelRobot, "#0000FF", 120,
                     [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
 }
 
@@ -396,12 +369,16 @@ function drawTargetPreviewOnField(canvas, debugInfo=false, scaledTargetPos = und
     {
         var ctx = canvas.getContext('2d');
         ctx.fillStyle = canvasTextColor;
-        ctx.font = mapValueToCurrentCanvas(mapValueToCurrentField(180))+"px Arial";
-        ctx.fillText("X: "+scaledTarget[0]+", Y: "+-scaledTarget[1], 
-                    mapValueToCurrentCanvas(mapValueToCurrentField(280)),
-                    mapValueToCurrentCanvas(mapValueToCurrentField(300)) );
+        ctx.font = mapValueToCurrentCanvas(mapValueToCurrentField(180)) + "px Arial";
+        
+        // Aumentiamo il valore di x per spostare il testo a destra
+        var xCoord = mapValueToCurrentCanvas(mapValueToCurrentField(800));  // Aggiungiamo 50 unità
+        
+        ctx.fillText("X: " + scaledTarget[0] + ", Y: " + -scaledTarget[1], 
+                     xCoord,
+                     mapValueToCurrentCanvas(mapValueToCurrentField(300)));
     }
-
+    
     console.log("Drawing target preview: "+unscaledTarget)
     drawTargetOnField(canvas, unscaledTarget[0], unscaledTarget[1], targetColor)
 }
@@ -421,8 +398,8 @@ drawObstacles(ctx)
                 [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2])
                 
         drawTextLabel(ctx, 
-            mapValueToCurrentCanvas(mapValueToCurrentField(obs[0])) + FieldDimensions.ROBOT_RADIUS * 2, 
-            mapValueToCurrentCanvas(mapValueToCurrentField(obs[1])) + FieldDimensions.ROBOT_RADIUS * 2, "Obstacle", "#FF0000", 95,
+            mapValueToCurrentCanvas(mapValueToCurrentField(obs[0])) + FieldDimensions.ROBOT_RADIUS*0.25, 
+            mapValueToCurrentCanvas(mapValueToCurrentField(obs[1])) + FieldDimensions.ROBOT_RADIUS * 2, "Obstacle", "#FF0000", 110,
             [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2])
     }
 }
@@ -498,10 +475,6 @@ function sendNewTask(selectedRobot, taskType, taskLabel, selectionMode, strategy
     }
 }
 
-function removeTask(taskId)
-{
-    sendToWebSocket("Undo:"+taskId);
-}
 
 //--------------
 //| WEBSOCKET  |
@@ -516,7 +489,7 @@ var CLIENT_ID = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function
 
 function generateHeader()
 {
-    return "TOSERVER!clientID,"+CLIENT_ID+";robotNumber,"+3+";robotTeammateNumber,"+4+"|";
+    return "TOSERVER!clientID,"+CLIENT_ID+";robotNumber,"+CONTROLLED_ROBOT+";robotTeammateNumber,"+AUTONOMOUS_ROBOT+"|";
 }
 
 function sendToWebSocket(message)
@@ -545,12 +518,12 @@ function disableClient(reason)
 
 }
 
-function createTaskAssignmentButton(tab, taskLabel, taskType, selectionMode, larghezza, taskLabel1, taskType1) {
+function createTaskAssignmentButton(tab, taskLabel, taskType, selectionMode, consecutive_button, taskLabel1, taskType1) {
     var outerDiv = createContainer("18%");
     var middleDiv = createContainer("80%");
     outerDiv.appendChild(middleDiv);
     
-    if (larghezza) {
+    if (consecutive_button) {
         middleDiv.style.display = "flex"; // Set middleDiv as flex container
         middleDiv.style.justifyContent = "space-around"; // Distribute space around items
         var innerDiv1 = createContainer("100%", "48%"); // Adjust width for each inner div
@@ -669,6 +642,8 @@ function createStrategyAssignmentButton(tab, strategyLabel, strategyNumber, sele
     tasksTab.appendChild(outerDiv);
 }
 
+var currentTaskList = [];
+var lastReceivedTaskID = 0;
 function createTableTask(tabId, id, taskID, strategy, task, undoButton) {
     var tab = document.getElementById(tabId);
 
@@ -681,46 +656,69 @@ function createTableTask(tabId, id, taskID, strategy, task, undoButton) {
     outerDiv.style.paddingTop = "5%";
     outerDiv.style.padding = "1vw";
     outerDiv.style.border = "3px solid #ccc";
+    outerDiv.style.marginBottom = "1vw"; // Controlla questo valore
 
+    var containerDiv1 = document.createElement("DIV");
+    containerDiv1.classList.add("column-container");
+    containerDiv1.style.flex = "1";
+    containerDiv1.style.padding = "5px";
+    containerDiv1.style.borderRight = "1px solid #ddd";
     var labelDiv1 = document.createElement("DIV");
-    labelDiv1.classList.add("column");
     labelDiv1.innerHTML = id;
-    labelDiv1.style.flex = "1";
     labelDiv1.style.fontSize = "1.0vw";
+    labelDiv1.style.color = "#333";
+    containerDiv1.appendChild(labelDiv1);
 
+    var containerDiv2 = document.createElement("DIV");
+    containerDiv2.classList.add("column-container");
+    containerDiv2.style.flex = "4";
+    containerDiv2.style.padding = "5px";
+    containerDiv2.style.borderRight = "1px solid #ddd";
     var labelDiv2 = document.createElement("DIV");
-    labelDiv2.classList.add("column");
     labelDiv2.innerHTML = "Strategy " + strategy;
-    labelDiv2.style.flex = "4";
     labelDiv2.style.fontSize = "1.0vw";
+    labelDiv2.style.color = "#333";
+    containerDiv2.appendChild(labelDiv2);
 
+    var containerDiv3 = document.createElement("DIV");
+    containerDiv3.classList.add("column-container");
+    containerDiv3.style.flex = "4";
+    containerDiv3.style.padding = "5px";
+    containerDiv3.style.maxWidth = "calc(60% - 10px)";
+    containerDiv3.style.overflow = "hidden";
     var labelDiv3 = document.createElement("DIV");
-    labelDiv3.classList.add("column");
     labelDiv3.innerHTML = task;
-    labelDiv3.style.flex = "4";
     labelDiv3.style.fontSize = "1.0vw";
+    labelDiv3.style.color = "#333";
+    containerDiv3.appendChild(labelDiv3);
 
     var buttonDiv1 = document.createElement("DIV");
-    buttonDiv1.classList.add("column");
-    buttonDiv1.style.flex = "3"; 
-
+    buttonDiv1.classList.add("column-container");
+    buttonDiv1.style.flex = "3";
+    buttonDiv1.style.display = "flex";
+    buttonDiv1.style.justifyContent = "center";
+    buttonDiv1.style.alignItems = "center";
+    buttonDiv1.style.padding = "5px";
+    
     var button1 = document.createElement("BUTTON");
     button1.innerHTML = undoButton;
+    button1.classList.add("undo-button");
     buttonDiv1.appendChild(button1);
 
     button1.addEventListener("click", function() {
-        currentTaskList.splice(id - 1, 1);
-        updateTaskTable(tabId);
         removeTask(taskID);
+        updateTaskTable(tabId);
     });
 
-    outerDiv.appendChild(labelDiv1);
-    outerDiv.appendChild(labelDiv2);
-    outerDiv.appendChild(labelDiv3);
+    outerDiv.appendChild(containerDiv1);
+    outerDiv.appendChild(containerDiv2);
+    outerDiv.appendChild(containerDiv3);
     outerDiv.appendChild(buttonDiv1);
 
     tab.appendChild(outerDiv);
 }
+
+
 
 
 function updateTaskTable(tabId) {
@@ -728,8 +726,25 @@ function updateTaskTable(tabId) {
     tab.innerHTML = ''; 
 
     currentTaskList.forEach((task, index) => {
-        createTableTask(tabId, task.taskID, task.taskID, task.strategy, task.taskType, 'Undo');
+        createTableTask(tabId, index+1, task.taskID, task.strategy, task.taskLabel, 'Undo');
     });
+}
+
+function removeTask(taskID) {
+    currentTaskList = currentTaskList.filter(task => task.taskID !== taskID);
+    sendToWebSocket("Undo:"+taskID);
+}
+
+function addTask(taskType, strategy, ciao, taskDescription) {
+    var newTask = {
+        id: currentTaskList.length + 1,
+        taskID: lastReceivedTaskID,
+        strategy: strategy,
+        taskType: taskType,
+        taskDescription: taskDescription
+    };
+    currentTaskList.push(newTask);
+    updateTaskTable('taskCanvas');
 }
 
 
@@ -900,15 +915,15 @@ function setupSocket(webSocket)
         packetsLabel.textContent = "Packets Left: " + packets;
     }
 
-    function addTask(taskType, taskID, strategy, parameters = undefined)
+    function addTask(taskType, taskID, strategy, taskLabel, parameters = undefined)
     {
         if(parameters == undefined)
         {
-            currentTaskList.push({taskType : taskType, taskID : taskID, strategy : strategy})
+            currentTaskList.push({taskType : taskType, taskID : taskID, strategy : strategy, taskLabel : taskLabel})
         }
         else
         {
-            currentTaskList.push({taskType : taskType, taskID : taskID, strategy : strategy, parameters : parameters})
+            currentTaskList.push({taskType : taskType, taskID : taskID, strategy : strategy, taskLabel : taskLabel, parameters : parameters})
         }
         updateTaskTable('taskCanvas');
     }
@@ -966,12 +981,14 @@ function switchMessageContent(message_content) {
     if(message_content.startsWith("robotPos")) {
         var field = message_content.split(":")[1]
         obsCoords = field.split(",")
-        console.log(obsCoords)
         robotNumber = parseInt(obsCoords[0]);
+        var transformedCoordinates = transformCoordinates(obsCoords[2], obsCoords[3]);
+        var xPos = transformedCoordinates.x_pos_robocup_field;
+        var yPos = transformedCoordinates.y_pos_robocup_field;
         robotNumbersToPositions[robotNumber] = [
-            parseFloat(obsCoords[1]+Math.PI), 
-            Math.floor(parseFloat(obsCoords[2])), 
-            -Math.floor(parseFloat(obsCoords[3]))
+            parseFloat(obsCoords[1]), 
+            Math.floor(parseFloat(xPos)), 
+            Math.floor(parseFloat(yPos))
         ];
     }
 

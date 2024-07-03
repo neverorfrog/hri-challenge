@@ -37,6 +37,10 @@ command_format: "<BBBff"
 # 22-24)  2B padding
 # 24-30)  6f (12B) obsCenterX
 # 30-36)  6f (12B) obsCenterY
-# 36)     1H (2B) messageBudget
-# 37)     1H (2B) secsRemaining
-data_format: "<d4sBBBB3ff2fBBB6BB2B6f6fHH"
+# 36-42)  6f (12B) obsLastSeen
+# 42)     1H (2B) messageBudget
+# 43)     1H (2B) secsRemaining
+# 44-46)     2B armContact
+# 46-48)     2B armPushDirection
+# 48-50)     2f (8B) armTimeOfLastContact
+data_format: "<d4sBBBB3ff2fBBB6BB2B6f6f6fHH2B2B2f"

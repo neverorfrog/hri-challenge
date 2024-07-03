@@ -42,8 +42,12 @@ class DataEntryIndex(Enum):
     ObstacleTypes = 15
     ObstacleCenterX = 24
     ObstacleCenterY = 30
-    MessageBudget = 36
-    SecsRemaining = 37
+    ObstacleLastSeen = 36
+    MessageBudget = 42
+    SecsRemaining = 43
+    ArmContact = 44
+    ArmContactPos = 46
+    ArmTimeOfLastContact = 48
     
 class ObstacleType(Enum):
     Nothing = -1

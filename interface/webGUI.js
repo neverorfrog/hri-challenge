@@ -869,29 +869,6 @@ function sendClientInfo()
 
 function setupSocket(webSocket)
 {
-    webSocket.onopen = function () {
-        // connection is opened and ready to use
-        
-        currentSocket = webSocket;
-
-        //console.log("WebSocket connected to NodeJS server")
-        //console.log(webSocket)
-        sendClientInfo(webSocket);
-
-        //Start rendering the canvas
-        enableClient();
-
-        //Set up a ping pong method for keepalive
-        //console.log("Setting up keepalive")
-        keepalive_send_timeout = setInterval(requestKeepalive, KEEPALIVE_SEND_INTERVAL);
-
-        startRenderingLoop();
-    };
-
-    webSocket.onerror = function (error) {
-        // an error occurred when sending/receiving data
-    };
-
     function resetTaskList()
     {
         currentTaskList = [];
@@ -926,6 +903,92 @@ function setupSocket(webSocket)
         updateTaskTable('taskCanvas');
     }
 
+    function switchMessageContent(message_content) {
+
+        if(message_content.startsWith("timeLeft")) {
+            tempoRimanente =  message_content.split(":")[1]
+            updateTimeLabel(tempoRimanente);
+        }
+    
+        if(message_content.startsWith("score")) {
+            score =  message_content.split(":")[1]
+            updateScoreLabel(score);
+        }
+    
+        if(message_content.startsWith("packetsLeft")) {
+            packets_left =  message_content.split(":")[1]
+            updatePacketsLabel(packets_left);
+        }
+    
+        if(message_content.startsWith("robotPos")) {
+            var field = message_content.split(":")[1]
+            obsCoords = field.split(",")
+            robotNumber = parseInt(obsCoords[0]);
+            var transformedCoordinates = transformCoordinates(obsCoords[2], obsCoords[3]);
+            var xPos = transformedCoordinates.x_pos_robocup_field;
+            var yPos = transformedCoordinates.y_pos_robocup_field;
+            robotNumbersToPositions[robotNumber] = [
+                parseFloat(obsCoords[1]), 
+                Math.floor(parseFloat(xPos)), 
+                Math.floor(parseFloat(yPos))
+            ];
+        }
+    
+        if(message_content.startsWith("ballPos")) {
+            message_content = message_content.split(":")[1]
+            var message_fields = message_content.split(",")
+            var transformedCoordinates = transformCoordinates(message_fields[0], message_fields[1]);
+            var xPos = transformedCoordinates.x_pos_robocup_field;
+            var yPos = transformedCoordinates.y_pos_robocup_field;
+            ballPosition = [Math.floor(parseFloat(xPos)), Math.floor(parseFloat(yPos))]
+        }
+    
+        if(message_content.startsWith("obstacles")){
+            var message_fields = message_content.split(":")[1].split(";")
+            obstaclesPositions = []
+            for(var field of message_fields)
+            {
+                var obsCoords = field.split(",")
+                var transformedCoordinates = transformCoordinates(obsCoords[0], obsCoords[1]);
+                var xPos = transformedCoordinates.x_pos_robocup_field;
+                var yPos = transformedCoordinates.y_pos_robocup_field;    
+                //NOTICE: the y coordinate is inverted
+                obstaclesPositions.push([Math.floor(parseFloat(xPos)), Math.floor(parseFloat(yPos))])
+            }              
+        }
+    
+        if(message_content.startsWith("lastReceivedTask")) {
+            lastReceivedTaskID += 1
+            message_content = message_content.split(":")[1]
+            var message_fields = message_content.split(",")
+            addTask(message_fields[1], message_fields[0], message_fields[2])
+            //createTableTask("taskCanvas", message_fields[0], strategySelected, message_fields[1], "undo")
+        } 
+    }
+    
+    webSocket.onopen = function () {
+        // connection is opened and ready to use
+        
+        currentSocket = webSocket;
+
+        //console.log("WebSocket connected to NodeJS server")
+        //console.log(webSocket)
+        sendClientInfo(webSocket);
+
+        //Start rendering the canvas
+        enableClient();
+
+        //Set up a ping pong method for keepalive
+        //console.log("Setting up keepalive")
+        keepalive_send_timeout = setInterval(requestKeepalive, KEEPALIVE_SEND_INTERVAL);
+
+        startRenderingLoop();
+    };
+
+    webSocket.onerror = function (error) {
+        // an error occurred when sending/receiving data
+    };
+
     webSocket.onmessage = function (message) {
         // handle incoming message
         //console.log(message)
@@ -959,68 +1022,6 @@ function setupSocket(webSocket)
     };
 }
 
-function switchMessageContent(message_content) {
-
-    if(message_content.startsWith("timeLeft")) {
-        tempoRimanente =  message_content.split(":")[1]
-        updateTimeLabel(tempoRimanente);
-    }
-
-    if(message_content.startsWith("score")) {
-        score =  message_content.split(":")[1]
-        updateScoreLabel(score);
-    }
-
-    if(message_content.startsWith("packetsLeft")) {
-        packets_left =  message_content.split(":")[1]
-        updatePacketsLabel(packets_left);
-    }
-
-    if(message_content.startsWith("robotPos")) {
-        var field = message_content.split(":")[1]
-        obsCoords = field.split(",")
-        robotNumber = parseInt(obsCoords[0]);
-        var transformedCoordinates = transformCoordinates(obsCoords[2], obsCoords[3]);
-        var xPos = transformedCoordinates.x_pos_robocup_field;
-        var yPos = transformedCoordinates.y_pos_robocup_field;
-        robotNumbersToPositions[robotNumber] = [
-            parseFloat(obsCoords[1]), 
-            Math.floor(parseFloat(xPos)), 
-            Math.floor(parseFloat(yPos))
-        ];
-    }
-
-    if(message_content.startsWith("ballPos")) {
-        message_content = message_content.split(":")[1]
-        var message_fields = message_content.split(",")
-        var transformedCoordinates = transformCoordinates(message_fields[0], message_fields[1]);
-        var xPos = transformedCoordinates.x_pos_robocup_field;
-        var yPos = transformedCoordinates.y_pos_robocup_field;
-        ballPosition = [Math.floor(parseFloat(xPos)), Math.floor(parseFloat(yPos))]
-    }
-
-    if(message_content.startsWith("obstacles")){
-        var message_fields = message_content.split(":")[1].split(";")
-        obstaclesPositions = []
-        for(var field of message_fields)
-        {
-            var obsCoords = field.split(",")
-            var transformedCoordinates = transformCoordinates(obsCoords[0], obsCoords[1]);
-            var xPos = transformedCoordinates.x_pos_robocup_field;
-            var yPos = transformedCoordinates.y_pos_robocup_field;    
-            //NOTICE: the y coordinate is inverted
-            obstaclesPositions.push([Math.floor(parseFloat(xPos)), Math.floor(parseFloat(yPos))])
-        }              
-    }
-
-    if(message_content.startsWith("lastReceivedTask")) {
-        lastReceivedTaskID += 1
-        message_content = message_content.split(":")[1]
-        var message_fields = message_content.split(",")
-        addTask(message_fields[1], message_fields[0], message_fields[2])
-        //createTableTask("taskCanvas", message_fields[0], strategySelected, message_fields[1], "undo")
-    } 
-}
 
 //Taken from https://stackoverflow.com/questions/13546424/how-to-wait-for-a-websockets-readystate-to-change
 function waitForWebSocketConnection(webSocket)

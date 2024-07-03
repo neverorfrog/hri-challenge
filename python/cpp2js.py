@@ -50,7 +50,6 @@ class Cpp2Js(threading.Thread):
             )
             
             current_teammates = self.debuginfo.teammates.get_current()
-            print(current_teammates.shape)
             self.send_robot_pose(
                 current_teammates[0], 
                 current_teammates[1], 
@@ -58,7 +57,6 @@ class Cpp2Js(threading.Thread):
             )
             
             current_opponents = self.debuginfo.opponents.get_current()
-            print(current_opponents.shape)
             for i in range(len(current_opponents)):
                 self.send_robot_pose(
                     current_opponents[i], 

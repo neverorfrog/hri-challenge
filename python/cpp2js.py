@@ -42,22 +42,27 @@ class Cpp2Js(threading.Thread):
                 debug_packet[types_index : types_index+self.config.MAX_OBSTACLES]
             )
             
+            current_me = self.debuginfo.controlled_robot.get_current()
             self.send_robot_pose(
-                self.debuginfo.controlled_robot_x.get_last_elem(), 
-                self.debuginfo.controlled_robot_y.get_last_elem(), 
+                current_me[0], 
+                current_me[1], 
                 PlotId.ControlledRobot.value
             )
             
+            current_teammates = self.debuginfo.teammates.get_current()
+            print(current_teammates.shape)
             self.send_robot_pose(
-                self.debuginfo.autonomous_robot_x.get_last_elem(), 
-                self.debuginfo.autonomous_robot_y.get_last_elem(), 
+                current_teammates[0], 
+                current_teammates[1], 
                 PlotId.AutonomousRobot.value
             )
             
-            for i in range(2): # TODO hardcodato
+            current_opponents = self.debuginfo.opponents.get_current()
+            print(current_opponents.shape)
+            for i in range(len(current_opponents)):
                 self.send_robot_pose(
-                    self.debuginfo.opponents_x.get_last_elem()[i], 
-                    self.debuginfo.opponents_y.get_last_elem()[i], 
+                    current_opponents[i], 
+                    current_opponents[i], 
                     PlotId.Opponent.value + i 
                 )
             

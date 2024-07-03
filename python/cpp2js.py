@@ -26,17 +26,40 @@ class Cpp2Js(threading.Thread):
         while not self.stop_threads.is_set():
             debug_packet = self.receive_from_cpp()
             
-            self.save_controlled_robot_pose(debug_packet)
-            self.save_obstacles(debug_packet)
+            self.debuginfo.save_controlled_robot_pose(
+                debug_packet[DataEntryIndex.PosX.value], 
+                debug_packet[DataEntryIndex.PosY.value], 
+                debug_packet[DataEntryIndex.Theta.value]
+            )
             
-            controlled_robot_pos_x = self.debuginfo.controlledRobotPosX.get_last_elem()
-            controlled_robot_pos_y = self.debuginfo.controlledRobotPosY.get_last_elem()
-            self.send_robot_pose(controlled_robot_pos_x, controlled_robot_pos_y, PlotId.ControlledRobot)
+            x_index = DataEntryIndex.ObstacleCenterX.value
+            y_index = DataEntryIndex.ObstacleCenterY.value
+            types_index = DataEntryIndex.ObstacleTypes.value
+            self.debuginfo.save_obstacle_positions(
+                debug_packet[DataEntryIndex.CurrentObstacleSize.value], 
+                debug_packet[x_index : x_index+self.config.MAX_OBSTACLES], 
+                debug_packet[y_index : y_index+self.config.MAX_OBSTACLES], 
+                debug_packet[types_index : types_index+self.config.MAX_OBSTACLES]
+            )
             
+            self.send_robot_pose(
+                self.debuginfo.controlled_robot_x.get_last_elem(), 
+                self.debuginfo.controlled_robot_y.get_last_elem(), 
+                PlotId.ControlledRobot.value
+            )
             
-            autonomous_robot_pos_x = self.debuginfo.autonomousRobotPosX.get_last_elem() + controlled_robot_pos_x
-            autonomous_robot_pos_y = self.debuginfo.autonomousRobotPosY.get_last_elem() + controlled_robot_pos_y
-            self.send_robot_pose(autonomous_robot_pos_x, autonomous_robot_pos_y, PlotId.AutonomousRobot)
+            self.send_robot_pose(
+                self.debuginfo.autonomous_robot_x.get_last_elem(), 
+                self.debuginfo.autonomous_robot_y.get_last_elem(), 
+                PlotId.AutonomousRobot.value
+            )
+            
+            for i in range(2): # TODO hardcodato
+                self.send_robot_pose(
+                    self.debuginfo.opponents_x.get_last_elem()[i], 
+                    self.debuginfo.opponents_y.get_last_elem()[i], 
+                    PlotId.Opponent.value + i 
+                )
             
             self.send_ball_info(debug_packet)
             self.send_game_info(debug_packet)
@@ -52,34 +75,10 @@ class Cpp2Js(threading.Thread):
         else:
             print(f"Received unexpected data from C++: {data}")
         return debug_packet
-    
-    def save_controlled_robot_pose(self, debug_packet) -> None:
-        pos_x = debug_packet[DataEntryIndex.PosX.value]
-        pos_y = debug_packet[DataEntryIndex.PosY.value]
-        theta = debug_packet[DataEntryIndex.Theta.value]
-        self.debuginfo.controlledRobotPosX.append(pos_x)
-        self.debuginfo.controlledRobotPosY.append(pos_y)
-        self.debuginfo.controlledRobotTheta.append(theta)
         
-    def save_obstacles(self, debug_packet) -> None:
-        #extract x and y positions of obstacles
-        index = DataEntryIndex.ObstacleCenterX.value
-        obstacle_x_pos = debug_packet[index:index+self.config.MAX_OBSTACLES]
-        index = DataEntryIndex.ObstacleCenterY.value
-        obstacle_y_pos = debug_packet[index:index+self.config.MAX_OBSTACLES]
         
-        #extract types of obstacles
-        index = DataEntryIndex.ObstacleTypes.value
-        obstacles_types = debug_packet[index:index+self.config.MAX_OBSTACLES]
-        
-        obstacle_size = debug_packet[DataEntryIndex.CurrentObstacleSize.value]
-        for i in range(obstacle_size):
-            if obstacles_types[i] == ObstacleType.Teammate.value:
-                self.debuginfo.autonomousRobotPosX.append(obstacle_x_pos[i])
-                self.debuginfo.autonomousRobotPosY.append(obstacle_y_pos[i])
-        
-    def send_robot_pose(self, pos_x, pos_y, plot_id: PlotId) -> None:
-        robot_pose = f"{plot_id.value},{0.},{pos_x},{pos_y}"
+    def send_robot_pose(self, pos_x, pos_y, plot_id: int) -> None:
+        robot_pose = f"{plot_id},{0.},{pos_x},{pos_y}"
         robot_pose_message = f"|robotPos:{robot_pose}"
         self.send_sock_js.sendto(robot_pose_message.encode(), (self.config.UDP_IP_JS, self.config.UDP_SEND_PORT_JS))
         
@@ -87,13 +86,11 @@ class Cpp2Js(threading.Thread):
         ballpos_x = debug_packet[DataEntryIndex.BallPosX.value]
         ballpos_y = debug_packet[DataEntryIndex.BallPosY.value]
         ball_position = f"{ballpos_x:.2f},{ballpos_y:.2f}"
-        print("BallPos: ", ball_position)
         ball_position_message = f"|ballPos:{ball_position}"
         self.send_sock_js.sendto(ball_position_message.encode(), (self.config.UDP_IP_JS, self.config.UDP_SEND_PORT_JS))
         
     def send_game_info(self, debug_packet) -> None:
         time_left = debug_packet[DataEntryIndex.SecsRemaining.value]
-        print("Time left: ", time_left)
         time_left_message = f"|timeLeft:{time_left}"
         self.send_sock_js.sendto(time_left_message.encode(), (self.config.UDP_IP_JS, self.config.UDP_SEND_PORT_JS))
 

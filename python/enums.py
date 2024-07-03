@@ -2,26 +2,26 @@ from enum import Enum
 
 class Command(Enum):
     Null = 0
-    Dribble = 1
-    GoToBallAndDribble = 2
-    KickTheBall = 3
-    PassTheBall = 4
-    GoToPosition = 5
-    AskForBall = 6
-    Spazza = 7
+    GoToPosition = 1
+    Dribble = 2
+    GoToBallAndDribble = 3
+    Kick = 4
+    Spazza = 5
+    Pass = 6
+    AskForTheBall = 7
     Turn = 8
-    SearchBall = 9
+    SearchTheBall = 9
     Stop = 10
-    LookLeft = 11
-    LookRight = 12
-    Scan = 13
-    LookTheBall = 14
+    LookAtTheBall = 11
+    LookForward = 12
+    LookLeft = 13
+    LookRight = 14
+    Scan = 15
     
 class Strategy(Enum):
     Default = 0
     Passaggi = 1
-    Boh1 = 2
-    Boh2 = 3
+    Difesa = 2
       
 class DataEntryIndex(Enum):
     Suca = 0

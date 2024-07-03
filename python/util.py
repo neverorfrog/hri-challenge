@@ -4,9 +4,9 @@ import netifaces
 import numpy as np
 
 class RingBuffer:
-    def __init__(self, size):
+    def __init__(self, size: int, dtype=float):
         self.size: int = size
-        self.data: np.ndarray = np.ndarray(shape=(size,), dtype=object)
+        self.data: np.ndarray = np.empty(shape=(size,), dtype=dtype)
         self.index: int = 0
     
     def append(self, elem):

@@ -6,7 +6,8 @@ if(typeof console === "undefined"){
 
 var AUTONOMOUS_ROBOT = 1
 var CONTROLLED_ROBOT = 2
-var OPPONENT = 3
+var OPPONENT1 = 3 // TODO hardcodato
+var OPPONENT2 = 4 // TODO hardcodato
 
 var strategySelected = 0
 
@@ -298,26 +299,58 @@ function transformCoordinates(x_pos, y_pos) {
     };
 }
 
-function drawRobot(ctx, robotNumber, angle, xPos, yPos, isActiveRobot = false, isActiveTeammateRobot = false) {
-    var fillColor = "#AAAAAA";
-    var lineColor = "#000000";
+function drawRobot(ctx, robotNumber, angle, xPos, yPos) {
 
-    if (isActiveRobot || isActiveTeammateRobot) {
-        fillColor = "#00FF00";
-        lineColor = "#0000FF";
+    var fillColor;
+    var lineColor;
+    var robotLabel;
+
+    robotNumber = parseInt(robotNumber);
+
+    switch(robotNumber) {
+        case AUTONOMOUS_ROBOT:
+            fillColor = "#FF0000";
+            lineColor = "#000000";
+            robotLabel = "Autonomous";
+            break;
+        case CONTROLLED_ROBOT:
+            fillColor = "#0000FF";
+            lineColor = "#000000";
+            robotLabel = "Controlled";
+            break;
+        case OPPONENT1:
+            fillColor = "#FFFF00";
+            lineColor = "#000000";
+            robotLabel = "Opponent";
+            break;
+        case OPPONENT2:
+            fillColor = "#FFFF00";
+            lineColor = "#000000";
+            robotLabel = "Opponent";
+            break;
     }
 
-    drawCircle(ctx, xPos, yPos, FieldDimensions.ROBOT_RADIUS, fillColor, lineColor, 
-                mapValueToCurrentCanvas(mapValueToCurrentField(20)), //border width 
-                [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawCircle(
+        ctx, 
+        xPos, 
+        yPos, 
+        FieldDimensions.ROBOT_RADIUS, 
+        fillColor, 
+        lineColor, 
+        mapValueToCurrentCanvas(mapValueToCurrentField(20)), //border width 
+        [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]
+    );
 
     
-    var labelRobot = robotNumber == CONTROLLED_ROBOT ? "Controlled" : "Autonomous";
-
-    drawTextLabel(ctx, 
-                    xPos + FieldDimensions.ROBOT_RADIUS*0.25 , 
-                    yPos - FieldDimensions.ROBOT_RADIUS * 1.5, labelRobot, "#0000FF", 120,
-                    [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]);
+    drawTextLabel(
+        ctx, 
+        xPos + FieldDimensions.ROBOT_RADIUS * 0.25 , 
+        yPos - FieldDimensions.ROBOT_RADIUS * 1.5, 
+        robotLabel, 
+        "#0000FF", 
+        80,
+        [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]
+    );
 }
 
 function drawBall(ctx)
@@ -409,14 +442,17 @@ function drawObjects(canvas)
     
     //Draw the ball
     drawBall(ctx)
+
     //Draw the active robots
     for( const [robotNumber, robotPosition] of Object.entries(robotNumbersToPositions)) 
     {
-        drawRobot(ctx, robotNumber, 
-                    robotPosition[0], 
-                    Utils.mapValue(robotPosition[1], -CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_WIDTH/2, -CURRENT_CANVAS_FIELD_WIDTH/2, CURRENT_CANVAS_FIELD_WIDTH/2),
-                    Utils.mapValue(robotPosition[2], -CANVAS_FIELD_HEIGHT/2, CANVAS_FIELD_HEIGHT/2, -CURRENT_CANVAS_FIELD_HEIGHT/2, CURRENT_CANVAS_FIELD_HEIGHT/2), 
-                    robotNumber == CONTROLLED_ROBOT, robotNumber == AUTONOMOUS_ROBOT)
+        drawRobot(
+            ctx, 
+            robotNumber, 
+            robotPosition[0], 
+            Utils.mapValue(robotPosition[1], -CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_WIDTH/2, -CURRENT_CANVAS_FIELD_WIDTH/2, CURRENT_CANVAS_FIELD_WIDTH/2),
+            Utils.mapValue(robotPosition[2], -CANVAS_FIELD_HEIGHT/2, CANVAS_FIELD_HEIGHT/2, -CURRENT_CANVAS_FIELD_HEIGHT/2, CURRENT_CANVAS_FIELD_HEIGHT/2)
+        )
     };
     drawObstacles(ctx)
 }
@@ -516,11 +552,10 @@ function disableClient(reason)
 
 }
 
-function createTaskAssignmentButton(tab, taskLabel, taskType, selectionMode, consecutive_button, taskLabel1, taskType1) {
+function createTaskAssignmentButton(tab, taskLabel, taskType, selectionModeButton1, consecutive_button, taskLabel1, taskType1, selectionModeButton2) {
     var outerDiv = createContainer("18%");
     var middleDiv = createContainer("80%");
     outerDiv.appendChild(middleDiv);
-    
     if (consecutive_button) {
         middleDiv.style.display = "flex"; // Set middleDiv as flex container
         middleDiv.style.justifyContent = "space-around"; // Distribute space around items
@@ -529,16 +564,16 @@ function createTaskAssignmentButton(tab, taskLabel, taskType, selectionMode, con
         middleDiv.appendChild(innerDiv1);
         middleDiv.appendChild(innerDiv2);
 
-        var btn1 = createButton(taskLabel , taskType, selectionMode);
-        var btn2 = createButton(taskLabel1, taskType1, selectionMode);
+        var btn1 = createButton(taskLabel, taskType, selectionModeButton1);
+        var btn2 = createButton(taskLabel1, taskType1, selectionModeButton2);
         innerDiv1.appendChild(btn1);
         innerDiv2.appendChild(btn2);
     } else {
-        var innerDiv = createContainer("100%", "100%");
+        var innerDiv = createContainer("95%", "100%");
         innerDiv.style.justifyContent = "space-around";
         middleDiv.appendChild(innerDiv);
         
-        var btn = createButton(taskLabel, taskType, selectionMode);
+        var btn = createButton(taskLabel, taskType, selectionModeButton1);
         innerDiv.appendChild(btn);
     }
 
@@ -790,33 +825,23 @@ function enableClient()
     canvas.currentlySelectedStrategyButton = undefined;
 
 
-    //TASK SENZA SELEZIONE DELLA POSIZIONE NEL CAMPO
-    createTaskAssignmentButton("tasks-tab", "Go to ball and dribble", "GoToBallAndDribble", "noSelection")
-    createTaskAssignmentButton("tasks-tab", "Pass the ball", "PassTheBall", "noSelection")
-    createTaskAssignmentButton("tasks-tab", "Ask for the ball", "AskForBall", "noSelection")
-    createTaskAssignmentButton("tasks-tab", "Spazza", "Spazza", "noSelection")
-    createTaskAssignmentButton("tasks-tab", "Search the ball", "SearchBall", "noSelection")
-        
-    //TASK CON SELEZIONE DELLA POSIZIONE NEL CAMPO
-    createTaskAssignmentButton("tasks-tab2", "Dribble", "Dribble", "selection")
-    createTaskAssignmentButton("tasks-tab2", "Kick", "KickTheBall", "selection")
-    createTaskAssignmentButton("tasks-tab2", "Go to position", "GoToPosition", "selection")
-    createTaskAssignmentButton("tasks-tab2", "Look the ball", "LookTheBall", "selection")
-    createTaskAssignmentButton("tasks-tab2", "Turn", "Turn", "selection")
-    
-    //STOP BUTTON
-    createTaskAssignmentButton("tasks-tab3", "Stop", "Stop", "noSelection")
-    
+    createTaskAssignmentButton("tasks-tab", "Go to position", "GoToPosition", "selection")
+    createTaskAssignmentButton("tasks-tab", "Dribble", "Dribble", "selection", true, "Go to Ball and dribble", "GoToBallAndDribble")
+    createTaskAssignmentButton("tasks-tab", "Kick", "Kick", "selection", true, "Spazza", "Spazza", "noSelection")
+    createTaskAssignmentButton("tasks-tab", "Pass", "Pass", "noSelection", true, "Ask for the ball", "AskForTheBall", "noSelection")
+    createTaskAssignmentButton("tasks-tab", "Turn", "Turn", "selection", true, "Search for the ball", "SearchTheBall", "noSelection")
+    createTaskAssignmentButton("tasks-tab", "Stop", "Stop", "noSelection")
+   
     //LOOK LEFT AND RIGHT SCAN
-    createTaskAssignmentButton("tasks-tab4", "Look left", "LookLeft", "noSelection", true, "Look right", "LookRight")
-    createTaskAssignmentButton("tasks-tab4", "Scan", "Scan", "noSelection", false)
+    createTaskAssignmentButton("tasks-tab2", "Look at the ball", "LookAtTheBall", "noSelection")
+    createTaskAssignmentButton("tasks-tab2", "Look forward", "LookForward", "noSelection")
+    createTaskAssignmentButton("tasks-tab2", "Look left", "LookLeft", "noSelection", true, "Look right", "LookRight", "noSelection")
+    createTaskAssignmentButton("tasks-tab2", "Scan", "Scan", "noSelection")
     
-
     //STRATEGY BUTTON
-    createStrategyAssignmentButton("tasks-tab5", "Strategy 1", 1, "noSelection")
-    createStrategyAssignmentButton("tasks-tab5", "Strategy 2", 2, "noSelection")
-    createStrategyAssignmentButton("tasks-tab5", "Strategy 3", 3, "noSelection")
-    createStrategyAssignmentButton("tasks-tab5", "Strategy 4", 4, "noSelection")
+    createStrategyAssignmentButton("strategy", "Default Strategy", 1, "noSelection")
+    createStrategyAssignmentButton("strategy", "Passaggi", 2, "noSelection")
+    createStrategyAssignmentButton("strategy", "Difesa", 3, "noSelection")
 
 }
 

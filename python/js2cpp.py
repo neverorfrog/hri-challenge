@@ -43,7 +43,6 @@ class Js2Cpp(threading.Thread):
         content_message = message_split.split(',')
         task_type = content_message[2]
         command_number = Command[task_type].value
-        task_id = int(content_message[3])
         strategy_number = int(content_message[5])
         task_label = content_message[4]
         selection = content_message[1]

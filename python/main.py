@@ -3,14 +3,16 @@ from util import load_config
 import os
 from js2cpp import Js2Cpp
 from cpp2js import Cpp2Js
+from debuginfo import DebugInfo
 
 
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
     config_path = os.path.join(here, "config.yaml")
     config: OmegaConf = load_config(config_path)
-    js2cpp = Js2Cpp(config)
-    cpp2js = Cpp2Js(config)
+    debuginfo = DebugInfo()
+    js2cpp = Js2Cpp(config, debuginfo)
+    cpp2js = Cpp2Js(config, debuginfo)
     js2cpp.start()
     cpp2js.start()
     try:

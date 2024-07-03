@@ -4,8 +4,9 @@ if(typeof console === "undefined"){
     console = {};
 }
 
-var CONTROLLED_ROBOT = 3
-var AUTONOMOUS_ROBOT = 4
+var AUTONOMOUS_ROBOT = 1
+var CONTROLLED_ROBOT = 2
+var OPPONENT = 3
 
 var strategySelected = 0
 
@@ -433,7 +434,6 @@ function drawCanvas()
     if(canvas.currentlySelectedTaskButton != undefined && canvas.currentlySelectedTaskButton.selectionMode != "noSelection")
         drawTargetPreviewOnField(canvas, true)    
     
-    //console.log("drawObjects")
     //Draw the ball, the robot positions and the obstacle positions
     drawObjects(canvas)
 }

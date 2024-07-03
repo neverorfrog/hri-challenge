@@ -1,64 +1,27 @@
 import yaml
 from omegaconf import OmegaConf
-from enum import Enum
 import netifaces
-            
-class Command(Enum):
-    Null = 0
-    Dribble = 1
-    GoToBallAndDribble = 2
-    KickTheBall = 3
-    PassTheBall = 4
-    GoToPosition = 5
-    AskForBall = 6
-    Spazza = 7
-    Turn = 8
-    SearchBall = 9
-    Stop = 10
-    LookLeft = 11
-    LookRight = 12
-    Scan = 13
-    LookTheBall = 14
+import numpy as np
+
+class RingBuffer:
+    def __init__(self, size):
+        self.size: int = size
+        self.data: np.ndarray = np.ndarray(shape=(size,), dtype=object)
+        self.index: int = 0
     
-class Strategy(Enum):
-    Default = 0
-    Passaggi = 1
-    Boh1 = 2
-    Boh2 = 3
-      
-class DataEntryIndex(Enum):
-    Suca = 0
-    Header = 1
-    Version = 2
-    PlayerNum = 3
-    TeamNum = 4
-    Fallen = 5
-    PosX = 6
-    PosY = 7
-    Theta = 8
-    BallAge = 9
-    BallPosX = 10
-    BallPosY = 11
-    PlayerRole = 12
-    NumDataBytes = 13
-    CurrentObstacleSize = 14
-    ObstacleTypes = 16
-    ObstacleCenters = 24
-    ObstacleLeft = 36
-    ObstacleRight = 48
-    MessageBudget = 60
-    SecsRemaining = 61
-    Padding = 62
+    def append(self, elem):
+        self.data[self.index] = elem
+        self.index = (self.index + 1) % self.size
+        
+    def __item__(self, index):
+        return self.data[index]
     
-class ObstacleType(Enum):
-    Goalpost = 0
-    Unknown = 1
-    SomeRobot = 2
-    Opponent = 3
-    Teammate = 4
-    FallenSomeRobot = 5
-    FallenOpponent = 6
-    FallenTeammate = 7
+    def get_last_elem(self):
+        if self.index == 0:
+            return self.data[self.size - 1]
+        else:
+            return self.data[self.index - 1]
+    
     
 def get_my_ip_address():
     ip_address = "Unable to get IP address"

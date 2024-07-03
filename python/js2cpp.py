@@ -1,12 +1,14 @@
 import socket
 import struct
 import threading
-from util import Command
+from enums import Command
+from debuginfo import DebugInfo
 
 class Js2Cpp(threading.Thread):
-    def __init__(self, config):
+    def __init__(self, config, debuginfo: DebugInfo):
         super().__init__()
         self.config = config
+        self.debuginfo = debuginfo
         self.stop_threads = threading.Event()
         self.receive_sock_js = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.receive_sock_js.bind((config.MY_IP, config.UDP_RECEIVE_PORT_JS))

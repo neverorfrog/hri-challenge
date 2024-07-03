@@ -59,8 +59,8 @@ class Cpp2Js(threading.Thread):
             current_opponents = self.debuginfo.opponents.get_current()
             for i in range(len(current_opponents)):
                 self.send_robot_pose(
-                    current_opponents[i], 
-                    current_opponents[i], 
+                    current_opponents[i,0], 
+                    current_opponents[i,1], 
                     PlotId.Opponent.value + i 
                 )
             

@@ -63,5 +63,6 @@ class DebugInfo:
         nearest_robots = RingBuffer(N, shape=(3,))
         
         # save the N nearest robots
-        for i in range(N):
-            nearest_robots.append(current_robots[sorted_indices[i],:])
+        if len(sorted_indices) >= N:
+            for i in range(N):
+                nearest_robots.append(current_robots[sorted_indices[i],:])

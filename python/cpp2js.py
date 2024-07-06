@@ -4,6 +4,7 @@ import threading
 from omegaconf import OmegaConf
 from enums import DataEntryIndex, PlotId, ObstacleType
 from debuginfo import DebugInfo
+import numpy as np
 
 class Cpp2Js(threading.Thread):
     def __init__(self, config: OmegaConf, debuginfo: DebugInfo):
@@ -66,6 +67,7 @@ class Cpp2Js(threading.Thread):
             
             self.send_ball_info(debug_packet)
             self.send_game_info(debug_packet)
+            self.send_autonomous_role(debug_packet)
             
     def receive_from_cpp(self) -> struct:
         debug_packet = None
@@ -96,6 +98,27 @@ class Cpp2Js(threading.Thread):
         time_left = debug_packet[DataEntryIndex.SecsRemaining.value]
         time_left_message = f"|timeLeft:{time_left}"
         self.send_sock_js.sendto(time_left_message.encode(), (self.config.UDP_IP_JS, self.config.UDP_SEND_PORT_JS))
+
+    def send_autonomous_role(self, debug_packet) -> None:
+        current_me = self.debuginfo.controlled_robot.get_current()
+        controlled_robot_pos_x = current_me[0]
+        controlled_robot_pos_y = current_me[1]
+
+        current_teammates = self.debuginfo.teammates.get_current()
+        autonomous_robot_pos_x = current_teammates[0]
+        autonomous_robot_pos_y = current_teammates[1]
+
+        ball_pos_x = debug_packet[DataEntryIndex.BallPosX.value]
+        ball_pos_y = debug_packet[DataEntryIndex.BallPosY.value]
+
+        controlled_ball_distance = np.sqrt((controlled_robot_pos_x - ball_pos_x)**2 + (controlled_robot_pos_y - ball_pos_y)**2)
+        autonomous_ball_distance = np.sqrt((autonomous_robot_pos_x - ball_pos_x)**2 + (autonomous_robot_pos_y - ball_pos_y)**2)
+
+        autonomous_striker = autonomous_ball_distance < controlled_ball_distance
+
+        autonomous_info = f"|autonomousRole:{autonomous_striker}"
+        self.send_sock_js.sendto(autonomous_info.encode(), (self.config.UDP_IP_JS, self.config.UDP_SEND_PORT_JS))
+
 
     def run(self):
         try:

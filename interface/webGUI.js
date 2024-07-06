@@ -99,6 +99,9 @@ var lastCompletedTaskID = -1;
 var currentTaskList = [];
 var currentTaskPreviews = [];
 
+// Autonomous Role
+var autonomousRole = "Striker";
+
 var mouseOverCanvas = false;
 
 function drawCircle(ctx, centerX, centerY, radius, fillColor = undefined, lineColor = "#000000", lineWidth = 5, withRespectToCenter = undefined)
@@ -351,6 +354,18 @@ function drawRobot(ctx, robotNumber, angle, xPos, yPos) {
         80,
         [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]
     );
+
+    if(robotNumber == AUTONOMOUS_ROBOT){
+        drawTextLabel(
+            ctx, 
+            xPos,
+            yPos+25, 
+            autonomousRole == "Striker" ? "S" : "J", 
+            "#FFFFFF", 
+            90,
+            [CANVAS_FIELD_WIDTH/2, CANVAS_FIELD_HEIGHT/2]
+        );
+    }
 }
 
 function drawBall(ctx)
@@ -989,6 +1004,11 @@ function setupSocket(webSocket)
             addTask(message_fields[1], message_fields[0], message_fields[2])
             //createTableTask("taskCanvas", message_fields[0], strategySelected, message_fields[1], "undo")
         } 
+
+        if(message_content.startsWith("autonomousRole")){
+            message_content = message_content.split(":")[1]
+            autonomousRole = message_content == "True" ? "Striker" : "Jolly"    
+        }
     }
     
     webSocket.onopen = function () {

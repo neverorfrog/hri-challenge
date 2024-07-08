@@ -524,6 +524,10 @@ function sendNewTask(selectedRobot, taskType, taskLabel, selectionMode, strategy
     }
 }
 
+function sendNewStrategy(strategySelected) {
+    sendToWebSocket(strategySelected)
+}
+
 
 //--------------
 //| WEBSOCKET  |
@@ -669,6 +673,7 @@ function createStrategyButton(label, strategyNumber, selectionMode) {
             // Update the currently selected button
             canvas.currentlySelectedStrategyButton = e.target;
         }
+        sendToWebSocket(strategySelected);
     };
 
     return btn;
@@ -854,9 +859,9 @@ function enableClient()
     createTaskAssignmentButton("tasks-tab2", "Scan", "Scan", "noSelection")
     
     //STRATEGY BUTTON
-    createStrategyAssignmentButton("strategy", "Default Strategy", 1, "noSelection")
-    createStrategyAssignmentButton("strategy", "Passaggi", 2, "noSelection")
-    createStrategyAssignmentButton("strategy", "Difesa", 3, "noSelection")
+    createStrategyAssignmentButton("strategy", "Passaggi", 1, "noSelection")
+    createStrategyAssignmentButton("strategy", "Difesa 1", 2, "noSelection")
+    createStrategyAssignmentButton("strategy", "Difesa 2", 3, "noSelection")
 
 }
 
@@ -1002,7 +1007,6 @@ function setupSocket(webSocket)
             message_content = message_content.split(":")[1]
             var message_fields = message_content.split(",")
             addTask(message_fields[1], message_fields[0], message_fields[2])
-            //createTableTask("taskCanvas", message_fields[0], strategySelected, message_fields[1], "undo")
         } 
 
         if(message_content.startsWith("autonomousRole")){

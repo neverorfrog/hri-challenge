@@ -526,6 +526,10 @@ function sendNewTask(selectedRobot, taskType, taskLabel, selectionMode, strategy
     }
 }
 
+function sendNewStrategy(strategySelected) {
+    sendToWebSocket(strategySelected)
+}
+
 
 //--------------
 //| WEBSOCKET  |
@@ -671,6 +675,7 @@ function createStrategyButton(label, strategyNumber, selectionMode) {
             // Update the currently selected button
             canvas.currentlySelectedStrategyButton = e.target;
         }
+        sendToWebSocket(strategySelected);
     };
 
     return btn;
@@ -856,9 +861,9 @@ function enableClient()
     createTaskAssignmentButton("tasks-tab2", "Scan", "Scan", "noSelection")
     
     //STRATEGY BUTTON
-    createStrategyAssignmentButton("strategy", "Default Strategy", 1, "noSelection")
-    createStrategyAssignmentButton("strategy", "Passaggi", 2, "noSelection")
-    createStrategyAssignmentButton("strategy", "Difesa", 3, "noSelection")
+    createStrategyAssignmentButton("strategy", "Passaggi", 1, "noSelection")
+    createStrategyAssignmentButton("strategy", "Difesa 1", 2, "noSelection")
+    createStrategyAssignmentButton("strategy", "Difesa 2", 3, "noSelection")
 
 }
 
@@ -943,6 +948,11 @@ function setupSocket(webSocket)
             currentTaskList.push({taskType : taskType, taskID : taskID, strategy : strategy, taskLabel : taskLabel, parameters : parameters})
         }
         updateTaskTable('taskCanvas');
+    }
+
+    function addStrategy(strategy) 
+    {
+        
     }
 
     function switchMessageContent(message_content) {

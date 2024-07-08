@@ -41,20 +41,23 @@ class Js2Cpp(threading.Thread):
             print(f"Received non-UTF-8 message from JavaScript: {data} from {addr}")
         message_split = message.split('|')[1]
         content_message = message_split.split(',')
-        task_type = content_message[2]
-        command_number = Command[task_type].value
-        strategy_number = int(content_message[5])
-        task_label = content_message[4]
-        selection = content_message[1]
-        print(f"Task Label: {task_label}")
-        if selection == "selection":
-            x_position = int(content_message[6])
-            y_position = int(content_message[7])
-            print(f"X Position: {x_position}")
-            print(f"Y Position: {y_position}")
-        else:
-            x_position = 0
-            y_position = 0
+        print(content_message)
+        if len(content_message) > 1:
+            task_type = content_message[2]
+            command_number = Command[task_type].value
+            strategy_number = int(content_message[5])
+            task_label = content_message[4]
+            selection = content_message[1]
+            if selection == "selection":
+                x_position = int(content_message[6])
+                y_position = int(content_message[7])
+            else:
+                x_position = 0
+                y_position = 0
+        elif len(content_message) == 1:
+            strategy_number = int(content_message[0])
+            print("receiving a strategy")
+            print(strategy_number)
         return command_number, strategy_number, x_position, y_position
     
     def send_to_cpp(self, command_number: int, strategy_number: int, x_position: int, y_position: int):

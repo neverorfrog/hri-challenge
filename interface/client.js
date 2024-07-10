@@ -326,35 +326,51 @@ webSocket.on('request', function(request) {
 // |   Serve WebPage   |
 // ---------------------
 
-const fs = require('fs')
-const path = require('path')
+const fs = require('fs');
+const path = require('path');
 
-var express = require('express');
-var app = express();
+const imagePath = path.join(__dirname, '../python/received_image.jpg');
+const express = require('express');
+const app = express();
 
-LOCAL_FRONTEND_GUI_PORT = 3000
+const LOCAL_FRONTEND_GUI_PORT = 3000
 
+// Serve static files
 app.use(express.static(__dirname));
 
-app.get('*', function(req, res) {
-  fs.readFile(__dirname+path.sep+'webGUI.js', "utf8", function (err, data){
-    
-    //First modify the js script to use the correct local ip (which is the websocket ip of this node js server)
-    data = "var SERVER_IP = '"+LOCAL_IP+"';\nconsole.log(SERVER_IP);\n"+data;
-    
-    //Write it as a new file
-    fs.writeFile(__dirname+path.sep+'webGUIWithCorrectAddress.js', data, {}, function() {
-      
-      //Then serve the HTML page
-      res.writeHead(200, { 'content-type': 'text/html' })
-      fs.createReadStream(__dirname+path.sep+'webGUI.html').pipe(res)
+// Serve the image
+app.get('/image', (req, res) => {
+    fs.readFile(imagePath, (err, data) => {
+        if (err) {
+            console.error('Error reading the image file:', err);
+            res.status(500).send('Error reading the image file');
+            return;
+        }
+        res.writeHead(200, { 'Content-Type': 'image/jpeg' });
+        res.end(data);
     });
-
-  });
 });
-app.listen(LOCAL_FRONTEND_GUI_PORT);
 
+app.get('*', (req, res) => {
+    fs.readFile(path.join(__dirname, 'webGUI.js'), 'utf8', (err, data) => {
+        if (err) {
+            res.status(500).send('Error reading the JS file');
+            return;
+        }
 
-console.log("[FRONTEND; SETUP] Frontend webGUI server listening:\n \
-\t Address: "+LOCAL_IP+":"+LOCAL_FRONTEND_GUI_PORT+"\n")
+        // First modify the js script to use the correct local IP
+        data = `var SERVER_IP = '${LOCAL_IP}';\nconsole.log(SERVER_IP);\n${data}`;
+
+        // Write it as a new file
+        fs.writeFile(path.join(__dirname, 'webGUIWithCorrectAddress.js'), data, {}, () => {
+            // Then serve the HTML page
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            fs.createReadStream(path.join(__dirname, 'webGUI.html')).pipe(res);
+        });
+    });
+});
+
+app.listen(LOCAL_FRONTEND_GUI_PORT, () => {
+    console.log(`[FRONTEND; SETUP] Frontend webGUI server listening:\n\t Address: ${LOCAL_IP}:${LOCAL_FRONTEND_GUI_PORT}\n`);
+});
 

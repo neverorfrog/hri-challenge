@@ -1,4 +1,4 @@
-UDP_IP_CPP: "0.0.0.0" # LUIGI IP Address
+UDP_IP_CPP: "192.168.19.1" # LUIGI IP Address
 MY_IP: "0.0.0.0" # MY IP Address
 UDP_IP_JS: "0.0.0.0" # JAVASCRIPT IP Address
 

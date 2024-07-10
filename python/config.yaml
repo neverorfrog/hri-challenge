@@ -2,6 +2,7 @@
 robot_ip: "10.0.19.28"       # LUIGI IP Address
 my_ip: "0.0.0.0"             # My IP Address
 
+
 # Ports
 debug_receive_port: 65305
 debug_send_port: 65301

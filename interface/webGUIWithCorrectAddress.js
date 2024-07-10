@@ -481,7 +481,7 @@ function drawCanvas()
     //console.log("drawField")
     drawField(canvas, canvas.height, canvas.height);
     
-    
+
     //console.log("drawTarget")
     //Draw the target for the currently selected task button (if there is one)
     if(canvas.currentlySelectedTaskButton != undefined && canvas.currentlySelectedTaskButton.selectionMode != "noSelection")
@@ -491,27 +491,37 @@ function drawCanvas()
     drawObjects(canvas)
 }
 
+function fillImage() {
+    var image_canvas = document.getElementById("image-canvas");
+    var ctx = image_canvas.getContext("2d");
+    var img = new Image();
+    img.onload = function() {
+        ctx.drawImage(img, 0, 0, image_canvas.width, image_canvas.height);
+    };
+    // Add a timestamp to the image URL to prevent caching
+    img.src = "/image?t=" + new Date().getTime();
+}
 
-function startRenderingLoop()
-{
-    if(!CLIENT_ENABLED) return;
+function startRenderingLoop() {
+    if (!CLIENT_ENABLED) return;
 
-    console.log("START RENDER")
-    var lastRender = 0
-    
-    function renderingLoop(timestamp)
-    {
-        if(!CLIENT_ENABLED) return
-        
-        
-        drawCanvas()
-        
-        lastRender = timestamp
-        
-        window.requestAnimationFrame(renderingLoop)
+    console.log("START RENDER");
+    var lastRender = 0;
+    var interval = 100; // interval in milliseconds
+
+    function renderingLoop(timestamp) {
+        if (!CLIENT_ENABLED) return;
+
+        if (timestamp - lastRender >= interval) {
+            // fillImage();
+            lastRender = timestamp;
+        }
+
+        drawCanvas();
+        window.requestAnimationFrame(renderingLoop);
     }
 
-    window.requestAnimationFrame(renderingLoop)
+    window.requestAnimationFrame(renderingLoop);
 }
 
 function sendNewTask(selectedRobot, taskType, taskLabel, selectionMode, strategySelected, xPos=undefined, yPos=undefined)
@@ -796,8 +806,6 @@ function addTask(taskType, strategy, ciao, taskDescription) {
     currentTaskList.push(newTask);
     updateTaskTable('taskCanvas');
 }
-
-
 
 function enableClient()
 {

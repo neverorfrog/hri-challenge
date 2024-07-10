@@ -4,6 +4,7 @@ import cv2
 
 MY_IP = "10.0.255.88"
 
+
 def start_server():
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -11,7 +12,7 @@ def start_server():
     server_socket.bind((MY_IP, 5432))
     
     server_socket.listen(5)
-    print("Server in ascolto su 10.0.255.244:5432")
+    print(f"Server in ascolto su {MY_IP}:5432")
     
     while True:
 

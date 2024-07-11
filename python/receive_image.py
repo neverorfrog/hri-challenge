@@ -2,11 +2,13 @@ import socket
 import numpy as np
 import cv2
 
+MY_IP = "10.0.255.88"
+
 def start_server():
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    server_socket.bind(('10.0.255.244', 5432))
+    server_socket.bind((MY_IP, 5432))
     
     server_socket.listen(5)
     print("Server in ascolto su 10.0.255.244:5432")
@@ -36,7 +38,7 @@ def start_server():
             image_array = np.frombuffer(image_data, dtype=np.uint8).reshape((480, 640))
             
 
-            cv2.imwrite("received_image.jpg", image_array)
+            cv2.imwrite("upper.jpg", image_array)
             
             response = "Immagine ricevuta"
             client_socket.send(response.encode('utf-8'))

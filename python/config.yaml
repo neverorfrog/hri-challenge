@@ -1,46 +1,58 @@
-UDP_IP_CPP: "0.0.0.0" # LUIGI IP Address
-MY_IP: "0.0.0.0" # MY IP Address
-UDP_IP_JS: "0.0.0.0" # JAVASCRIPT IP Address
+# IP Addresses
+robot_ip: "10.0.19.28"       # LUIGI IP Address
+my_ip: "0.0.0.0"             # My IP Address
 
-UDP_RECEIVE_PORT_CPP: 65305
-UDP_SEND_PORT_CPP: 65306
+# Ports
+debug_receive_port: 65305
+debug_send_port: 65301
 
-UDP_RECEIVE_PORT_JS: 65300
-UDP_SEND_PORT_JS: 65301
+image_receive_port: 5432
 
+command_send_port: 65306
+command_receive_port: 65300
+
+# Command Offset
 command_offset: 10
 
-debug: True
+# Debug Mode
+debug: true
 
-MAX_OBSTACLES: 6
+# Maximum Number of Obstacles
+max_obstacles: 6
 
-# 1B Comando corpo
-# 1B Comanda testa
-# 1B Strategia
-# 8B [pos_x, pos_y]
-command_format: "<BBBff" 
+# Command Format
+# 1B: Command body
+# 1B: Command head
+# 1B: Strategy
+# 8B: [pos_x, pos_y]
+command_format: "<BBBff"
 
-# 0)      1 double di qualcosa
+# Data Format
+# 0)      1 double of something
 # 1)      4B header
-# 2)      1B versione
-# 3)      1B playerNum
-# 4)      1B teamNum
+# 2)      1B version
+# 3)      1B player_num
+# 4)      1B team_num
 # 5)      1B fallen
-# 6-9)    3f (12B) [posX, posY, theta]
-# 9)      1f (4B) ballAge
-# 10-12)  2f (8B) [ballPosX, ballPosY]
-# 12)     1B playerRole
-# 13)     1B numOfDataBytes
-# 14)     1B currentObsSize
-# 15-21)  6B obstacleTypes  
+# 6-9)    3f (12B) [pos_x, pos_y, theta]
+# 9)      1f (4B) ball_age
+# 10-12)  2f (8B) [ball_pos_x, ball_pos_y]
+# 12)     1B player_role
+# 13)     1B num_of_data_bytes
+# 14)     1B current_obs_size
+# 15-21)  6B obstacle_types  
 # 21)     1B padding
 # 22-24)  2B padding
-# 24-30)  6f (12B) obsCenterX
-# 30-36)  6f (12B) obsCenterY
-# 36-42)  6f (12B) obsLastSeen
-# 42)     1H (2B) messageBudget
-# 43)     1H (2B) secsRemaining
-# 44-46)     2B armContact
-# 46-48)     2B armPushDirection
-# 48-50)     2f (8B) armTimeOfLastContact
+# 24-30)  6f (12B) obs_center_x
+# 30-36)  6f (12B) obs_center_y
+# 36-42)  6f (12B) obs_last_seen
+# 42)     1H (2B) message_budget
+# 43)     1H (2B) secs_remaining
+# 44-46)  2B arm_contact
+# 46-48)  2B arm_push_direction
+# 48-50)  2f (8B) arm_time_of_last_contact
 data_format: "<d4sBBBB3ff2fBBB6BB2B6f6f6fHH2B2B2f"
+
+# Image Size
+width: 640
+height: 480

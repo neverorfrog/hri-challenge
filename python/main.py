@@ -1,9 +1,12 @@
 from omegaconf import OmegaConf
+from socket_thread import SocketThread
 from util import load_config
 import os
-from js2cpp import Js2Cpp
-from cpp2js import Cpp2Js
-from debuginfo import DebugInfo
+from command_sender import CommandSender
+from debug_info_receiver import DebugInfoReceiver
+from camera_image_receiver import CameraImageReceiver
+from debug_info import DebugInfo
+from typing import List
 
 
 def main():
@@ -11,18 +14,22 @@ def main():
     config_path = os.path.join(here, "config.yaml")
     config: OmegaConf = load_config(config_path)
     debuginfo = DebugInfo()
-    js2cpp = Js2Cpp(config, debuginfo)
-    cpp2js = Cpp2Js(config, debuginfo)
-    js2cpp.start()
-    cpp2js.start()
+    
+    command_sender = CommandSender(config)
+    debug_info_receiver = DebugInfoReceiver(config, debuginfo)
+    camera_image_receiver = CameraImageReceiver(config)
+    threads: List[SocketThread] = [command_sender, debug_info_receiver, camera_image_receiver]
+    for thread in threads:
+        thread.start()
     try:
-        js2cpp.join()
-        cpp2js.join()
+        for thread in threads:
+            thread.join()
     except KeyboardInterrupt:
-        js2cpp.stop()
-        cpp2js.stop()
-        js2cpp.join()
-        cpp2js.join()
+        for thread in threads:
+            thread.stop()
+    finally:
+        for thread in threads:
+            thread.stop()
     
 
 if __name__ == "__main__":

@@ -24,6 +24,8 @@ class DebugInfo:
         
         self.nearest_robots = RingBuffer(W, shape=(N, 3))
         
+        self.debug_messages = list()
+        
     def save_controlled_robot_pose(self, pos_x: float, pos_y: float, theta: float) -> None:
         self.controlled_robot.append(np.array([pos_x, pos_y, theta]))
         

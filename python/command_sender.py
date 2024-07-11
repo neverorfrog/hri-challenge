@@ -1,18 +1,22 @@
 import socket
 import struct
-import threading
 from enums import Command
-from debuginfo import DebugInfo
+from socket_thread import SocketThread
 
-class Js2Cpp(threading.Thread):
-    def __init__(self, config, debuginfo: DebugInfo):
-        super().__init__()
-        self.config = config
-        self.debuginfo = debuginfo
-        self.stop_threads = threading.Event()
-        self.receive_sock_js = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.receive_sock_js.bind((config.MY_IP, config.UDP_RECEIVE_PORT_JS))
-        self.send_sock_cpp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+class CommandSender(SocketThread):
+    def __init__(self, config):
+        super().__init__(config)
+        self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._server_socket.bind((config.my_ip, config.command_receive_port))
+        self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        
+    @property
+    def server_socket(self):
+        return self._server_socket
+    
+    @property
+    def client_socket(self):
+        return self._client_socket
 
     def update(self):
         """
@@ -26,13 +30,13 @@ class Js2Cpp(threading.Thread):
 
         """
         while not self.stop_threads.is_set():
-            command_number, strategy_number, x_position, y_position = self.receive_from_js()
-            self.send_to_cpp(command_number, strategy_number, x_position, y_position)
+            command_number, strategy_number, x_position, y_position = self.receive_command_from_js()
+            self.send_command_to_cpp(command_number, strategy_number, x_position, y_position)
     
     
-    def receive_from_js(self) -> tuple[int, int, int, int]:
+    def receive_command_from_js(self) -> tuple[int, int, int, int]:
         try:
-            data, addr = self.receive_sock_js.recvfrom(1024)
+            data, addr = self.server_socket.recvfrom(1024)
         except Exception as e:
             print(f"Error in receiving the message: {e}")
         try:
@@ -57,7 +61,7 @@ class Js2Cpp(threading.Thread):
             y_position = 0
         return command_number, strategy_number, x_position, y_position
     
-    def send_to_cpp(self, command_number: int, strategy_number: int, x_position: int, y_position: int):
+    def send_command_to_cpp(self, command_number: int, strategy_number: int, x_position: int, y_position: int):
         if command_number > self.config.command_offset:
             command_body_number = Command.Null.value
             command_head_number = command_number - self.config.command_offset
@@ -73,26 +77,7 @@ class Js2Cpp(threading.Thread):
             y_position
         )
         try:
-            self.send_sock_cpp.sendto(encoded_data, (self.config.UDP_IP_CPP, self.config.UDP_SEND_PORT_CPP))
+            self.client_socket.sendto(encoded_data, (self.config.robot_ip, self.config.command_send_port))
             print(f"Sending message to C++: {encoded_data}")
         except Exception as e:
             print(f"Error in send_message: {e}")
-        
-
-    def run(self):
-        try:
-            thread = threading.Thread(target=self.update)
-            thread.start()
-            thread.join()
-        except KeyboardInterrupt:
-            print("Manual program interruption")
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
-        finally:
-            self.stop()
-    
-    def stop(self):
-        self.stop_threads.set()
-        self.send_sock_cpp.close()
-        self.receive_sock_js.close()
-        print("Sockets closed and threads stopped.")

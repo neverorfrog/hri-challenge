@@ -1,20 +1,26 @@
 import socket
 import struct
-import threading
 from omegaconf import OmegaConf
 from enums import DataEntryIndex, PlotId, ObstacleType
-from debuginfo import DebugInfo
+from debug_info import DebugInfo
 import numpy as np
+from socket_thread import SocketThread
 
-class Cpp2Js(threading.Thread):
+class DebugInfoReceiver(SocketThread):
     def __init__(self, config: OmegaConf, debuginfo: DebugInfo):
-        super().__init__()
-        self.config = config
+        super().__init__(config)
         self.debuginfo = debuginfo
-        self.stop_threads = threading.Event()
-        self.receive_sock_cpp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.receive_sock_cpp.bind((config.MY_IP, config.UDP_RECEIVE_PORT_CPP))
-        self.send_sock_js = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._server_socket.bind((config.my_ip, config.debug_receive_port))
+        self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    
+    @property
+    def server_socket(self):
+        return self._server_socket
+    
+    @property
+    def client_socket(self):
+        return self._client_socket
 
     def update(self):
         """
@@ -38,9 +44,9 @@ class Cpp2Js(threading.Thread):
             types_index = DataEntryIndex.ObstacleTypes.value
             self.debuginfo.save_obstacle_positions(
                 debug_packet[DataEntryIndex.CurrentObstacleSize.value], 
-                debug_packet[x_index : x_index+self.config.MAX_OBSTACLES], 
-                debug_packet[y_index : y_index+self.config.MAX_OBSTACLES], 
-                debug_packet[types_index : types_index+self.config.MAX_OBSTACLES]
+                debug_packet[x_index : x_index+self.config.max_obstacles], 
+                debug_packet[y_index : y_index+self.config.max_obstacles], 
+                debug_packet[types_index : types_index+self.config.max_obstacles]
             )
             
             current_me = self.debuginfo.controlled_robot.get_current()
@@ -72,7 +78,7 @@ class Cpp2Js(threading.Thread):
     def receive_from_cpp(self) -> struct:
         debug_packet = None
         try:    
-            data, _ = self.receive_sock_cpp.recvfrom(1024)
+            data, _ = self.server_socket.recvfrom(1024)
         except Exception as e:
             print(f"Error in receiving the message: {e}")
         if len(data) == struct.calcsize(self.config.data_format):
@@ -85,19 +91,19 @@ class Cpp2Js(threading.Thread):
     def send_robot_pose(self, pos_x, pos_y, plot_id: int) -> None:
         robot_pose = f"{plot_id},{0.},{pos_x},{pos_y}"
         robot_pose_message = f"|robotPos:{robot_pose}"
-        self.send_sock_js.sendto(robot_pose_message.encode(), (self.config.UDP_IP_JS, self.config.UDP_SEND_PORT_JS))
+        self.client_socket.sendto(robot_pose_message.encode(), (self.config.my_ip, self.config.debug_send_port))
         
     def send_ball_info(self, debug_packet) -> None:
         ballpos_x = debug_packet[DataEntryIndex.BallPosX.value]
         ballpos_y = debug_packet[DataEntryIndex.BallPosY.value]
         ball_position = f"{ballpos_x:.2f},{ballpos_y:.2f}"
         ball_position_message = f"|ballPos:{ball_position}"
-        self.send_sock_js.sendto(ball_position_message.encode(), (self.config.UDP_IP_JS, self.config.UDP_SEND_PORT_JS))
+        self.client_socket.sendto(ball_position_message.encode(), (self.config.my_ip, self.config.debug_send_port))
         
     def send_game_info(self, debug_packet) -> None:
         time_left = debug_packet[DataEntryIndex.SecsRemaining.value]
         time_left_message = f"|timeLeft:{time_left}"
-        self.send_sock_js.sendto(time_left_message.encode(), (self.config.UDP_IP_JS, self.config.UDP_SEND_PORT_JS))
+        self.client_socket.sendto(time_left_message.encode(), (self.config.my_ip, self.config.debug_send_port))
 
     def send_autonomous_role(self, debug_packet) -> None:
         current_me = self.debuginfo.controlled_robot.get_current()
@@ -117,23 +123,4 @@ class Cpp2Js(threading.Thread):
         autonomous_striker = autonomous_ball_distance < controlled_ball_distance
 
         autonomous_info = f"|autonomousRole:{autonomous_striker}"
-        self.send_sock_js.sendto(autonomous_info.encode(), (self.config.UDP_IP_JS, self.config.UDP_SEND_PORT_JS))
-
-
-    def run(self):
-        try:
-            thread = threading.Thread(target=self.update)
-            thread.start()
-            thread.join()
-        except KeyboardInterrupt:
-            print("Manual program interruption")
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
-        finally:
-            self.stop()
-            
-    def stop(self):
-        self.stop_threads.set()
-        self.receive_sock_cpp.close()
-        self.send_sock_js.close()
-        print("Sockets closed and threads stopped.")
+        self.client_socket.sendto(autonomous_info.encode(), (self.config.my_ip, self.config.debug_send_port))

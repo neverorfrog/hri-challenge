@@ -4,7 +4,6 @@ import cv2
 
 MY_IP = "10.0.255.88"
 
-
 def start_server():
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -329,7 +329,8 @@ webSocket.on('request', function(request) {
 const fs = require('fs');
 const path = require('path');
 
-const imagePath = path.join(__dirname, '../python/received_image.jpg');
+const upperImagePath = path.join(__dirname, '../python/upper.jpg');
+const lowerImagePath = path.join(__dirname, '../python/upper.jpg');
 const express = require('express');
 const app = express();
 
@@ -339,16 +340,28 @@ const LOCAL_FRONTEND_GUI_PORT = 3000
 app.use(express.static(__dirname));
 
 // Serve the image
-app.get('/image', (req, res) => {
-    fs.readFile(imagePath, (err, data) => {
-        if (err) {
-            console.error('Error reading the image file:', err);
-            res.status(500).send('Error reading the image file');
-            return;
-        }
-        res.writeHead(200, { 'Content-Type': 'image/jpeg' });
-        res.end(data);
-    });
+app.get('/upperimage', (req, res) => {
+  fs.readFile(upperImagePath, (err, data) => {
+    if (err) {
+      console.error('Error reading the upper image file:', err);
+      res.status(500).send('Error reading the upper image file');
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'image/jpeg' });
+    res.end(data);
+  });
+});
+
+app.get('/lowerimage', (req, res) => {
+  fs.readFile(lowerImagePath, (err, data) => {
+    if (err) {
+      console.error('Error reading the lower image file:', err);
+      res.status(500).send('Error reading the lower image file');
+      return;
+    }
+    res.writeHead(200, { 'Content-Type': 'image/jpeg' });
+    res.end(data);
+  });
 });
 
 app.get('*', (req, res) => {

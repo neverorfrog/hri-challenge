@@ -489,15 +489,26 @@ function drawCanvas()
     drawObjects(canvas)
 }
 
-function fillImage() {
-    var image_canvas = document.getElementById("image-canvas");
-    var ctx = image_canvas.getContext("2d");
+function fillUpperImage() {
+    var upper_image_canvas = document.getElementById("upper-image-canvas");
+    var ctx = upper_image_canvas.getContext("2d");
     var img = new Image();
     img.onload = function() {
-        ctx.drawImage(img, 0, 0, image_canvas.width, image_canvas.height);
+        ctx.drawImage(img, 0, 0, upper_image_canvas.width, upper_image_canvas.height);
     };
     // Add a timestamp to the image URL to prevent caching
-    img.src = "/image?t=" + new Date().getTime();
+    img.src = "/upperimage?t=" + new Date().getTime();
+}
+
+function fillLowerImage() {
+    var lower_image_canvas = document.getElementById("lower-image-canvas");
+    var ctx = lower_image_canvas.getContext("2d");
+    var img = new Image();
+    img.onload = function() {
+        ctx.drawImage(img, 0, 0, lower_image_canvas.width, lower_image_canvas.height);
+    };
+    // Add a timestamp to the image URL to prevent caching
+    img.src = "/lowerimage?t=" + new Date().getTime();
 }
 
 function startRenderingLoop() {
@@ -505,13 +516,14 @@ function startRenderingLoop() {
 
     console.log("START RENDER");
     var lastRender = 0;
-    var interval = 100; // interval in milliseconds
+    var interval = 200; // interval in milliseconds
 
     function renderingLoop(timestamp) {
         if (!CLIENT_ENABLED) return;
 
         if (timestamp - lastRender >= interval) {
-            // fillImage();
+            fillUpperImage();
+            fillLowerImage();
             lastRender = timestamp;
         }
 
@@ -570,8 +582,6 @@ function disableClient(reason)
 
     document.getElementById("body").style.visibility = "hidden";
     document.getElementById("tasks-tab").innerHTML = "";
-    //document.getElementById("simple-tasks-tab2").innerHTML = "";
-    //document.getElementById("complex-tasks-tab").innerHTML = "";
     currentTaskList = [];
     currentSocket = undefined;
 
@@ -849,7 +859,7 @@ function enableClient()
 
 
     createTaskAssignmentButton("tasks-tab", "Go to position", "GoToPosition", "selection")
-    createTaskAssignmentButton("tasks-tab", "Dribble", "Dribble", "selection", true, "Go to Ball and dribble", "GoToBallAndDribble")
+    createTaskAssignmentButton("tasks-tab", "Dribble", "Dribble", "selection", true, "Go to Ball and dribble", "GoToBallAndDribble", "noSelection")
     createTaskAssignmentButton("tasks-tab", "Kick", "Kick", "selection", true, "Spazza", "Spazza", "noSelection")
     createTaskAssignmentButton("tasks-tab", "Pass", "Pass", "noSelection", true, "Ask for the ball", "AskForTheBall", "noSelection")
     createTaskAssignmentButton("tasks-tab", "Turn", "Turn", "selection", true, "Search for the ball", "SearchTheBall", "noSelection")

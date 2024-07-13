@@ -64,3 +64,7 @@ class PlotId(Enum):
     AutonomousRobot = 1
     ControlledRobot = 2
     Opponent = 3
+    
+class CameraType(Enum):
+    Upper = "upper"
+    Lower = "lower"

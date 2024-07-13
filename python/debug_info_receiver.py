@@ -11,7 +11,7 @@ class DebugInfoReceiver(SocketThread):
         super().__init__(config)
         self.debuginfo = debuginfo
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._server_socket.bind((config.my_ip, config.debug_receive_port))
+        self._server_socket.bind((config.local_ip, config.debug_receive_port))
         self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     
     @property
@@ -91,19 +91,19 @@ class DebugInfoReceiver(SocketThread):
     def send_robot_pose(self, pos_x, pos_y, plot_id: int) -> None:
         robot_pose = f"{plot_id},{0.},{pos_x},{pos_y}"
         robot_pose_message = f"|robotPos:{robot_pose}"
-        self.client_socket.sendto(robot_pose_message.encode(), (self.config.my_ip, self.config.debug_send_port))
+        self.client_socket.sendto(robot_pose_message.encode(), (self.config.local_ip, self.config.debug_send_port))
         
     def send_ball_info(self, debug_packet) -> None:
         ballpos_x = debug_packet[DataEntryIndex.BallPosX.value]
         ballpos_y = debug_packet[DataEntryIndex.BallPosY.value]
         ball_position = f"{ballpos_x:.2f},{ballpos_y:.2f}"
         ball_position_message = f"|ballPos:{ball_position}"
-        self.client_socket.sendto(ball_position_message.encode(), (self.config.my_ip, self.config.debug_send_port))
+        self.client_socket.sendto(ball_position_message.encode(), (self.config.local_ip, self.config.debug_send_port))
         
     def send_game_info(self, debug_packet) -> None:
         time_left = debug_packet[DataEntryIndex.SecsRemaining.value]
         time_left_message = f"|timeLeft:{time_left}"
-        self.client_socket.sendto(time_left_message.encode(), (self.config.my_ip, self.config.debug_send_port))
+        self.client_socket.sendto(time_left_message.encode(), (self.config.local_ip, self.config.debug_send_port))
 
     def send_autonomous_role(self, debug_packet) -> None:
         current_me = self.debuginfo.controlled_robot.get_current()
@@ -123,4 +123,4 @@ class DebugInfoReceiver(SocketThread):
         autonomous_striker = autonomous_ball_distance < controlled_ball_distance
 
         autonomous_info = f"|autonomousRole:{autonomous_striker}"
-        self.client_socket.sendto(autonomous_info.encode(), (self.config.my_ip, self.config.debug_send_port))
+        self.client_socket.sendto(autonomous_info.encode(), (self.config.local_ip, self.config.debug_send_port))

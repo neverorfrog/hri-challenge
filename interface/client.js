@@ -330,7 +330,7 @@ const fs = require('fs');
 const path = require('path');
 
 const upperImagePath = path.join(__dirname, '../python/upper.jpg');
-const lowerImagePath = path.join(__dirname, '../python/upper.jpg');
+const lowerImagePath = path.join(__dirname, '../python/lower.jpg');
 const express = require('express');
 const app = express();
 

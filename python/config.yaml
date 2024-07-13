@@ -1,13 +1,14 @@
 # IP Addresses
-robot_ip: "10.0.19.28"       # LUIGI IP Address
-my_ip: "0.0.0.0"             # My IP Address
-
+robot_ip: "192.168.19.22"       # LUIGI IP Address
+local_ip: "0.0.0.0"             # My IP Address
+my_ip: "192.168.19.1"
 
 # Ports
 debug_receive_port: 65305
 debug_send_port: 65301
 
-image_receive_port: 5432
+upper_image_receive_port: 5432
+lower_image_receive_port: 5431
 
 command_send_port: 65306
 command_receive_port: 65300
@@ -55,5 +56,7 @@ command_format: "<BBBff"
 data_format: "<d4sBBBB3ff2fBBB6BB2B6f6f6fHH2B2B2f"
 
 # Image Size
-width: 640
-height: 480
+upper_image_width: 640
+upper_image_height: 480
+lower_image_width: 320
+lower_image_height: 240

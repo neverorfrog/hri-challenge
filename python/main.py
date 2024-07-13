@@ -4,7 +4,6 @@ from util import load_config
 import os
 from command_sender import CommandSender
 from debug_info_receiver import DebugInfoReceiver
-from camera_image_receiver import CameraImageReceiver
 from debug_info import DebugInfo
 from typing import List
 
@@ -17,8 +16,8 @@ def main():
     
     command_sender = CommandSender(config)
     debug_info_receiver = DebugInfoReceiver(config, debuginfo)
-    camera_image_receiver = CameraImageReceiver(config)
-    threads: List[SocketThread] = [command_sender, debug_info_receiver, camera_image_receiver]
+    threads: List[SocketThread] = [debug_info_receiver, command_sender]
+    
     for thread in threads:
         thread.start()
     try:

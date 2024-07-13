@@ -7,7 +7,7 @@ class CommandSender(SocketThread):
     def __init__(self, config):
         super().__init__(config)
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._server_socket.bind((config.my_ip, config.command_receive_port))
+        self._server_socket.bind((config.local_ip, config.command_receive_port))
         self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
     @property

@@ -41,16 +41,39 @@ body {
 /* FINE CAMPO */
 
 /* BOTTONI */
-
 #settings-container {
-    top: 9cap;
     overflow: hidden;
     position: relative;
     border: 0.2vw solid #ccc;
     background-color: #c0c821;
     width: 26%;
-    height: 90%;
+    height: 100%;
 }
+
+#info-tab{
+    width: 100%;
+    height: 8%;
+    display: flex;
+    flex-direction: row;
+    border: 0.3vw solid gray;
+    background-color: #e5dada;
+}
+
+#taskCanvas {
+    height: 100%;
+    width: 50%;
+    background-color: #e5dada;
+}
+
+.timeInfo {
+    height: 100%;
+    width: 50%;
+    background-color: #e5dada;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 
 #tasks-tab {
     width: 100%;

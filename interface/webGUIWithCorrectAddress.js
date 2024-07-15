@@ -725,7 +725,6 @@ function createTableTask(tabId, id, taskID, strategy, task, undoButton) {
     outerDiv.style.width = "100%";
     outerDiv.style.paddingTop = "5%";
     outerDiv.style.padding = "1vw";
-    outerDiv.style.border = "3px solid #ccc";
     outerDiv.style.marginBottom = "1vw"; // Controlla questo valore
 
     var containerDiv1 = document.createElement("DIV");
@@ -780,10 +779,10 @@ function createTableTask(tabId, id, taskID, strategy, task, undoButton) {
         updateTaskTable(tabId);
     });
 
-    outerDiv.appendChild(containerDiv1);
-    outerDiv.appendChild(containerDiv2);
+    // outerDiv.appendChild(containerDiv1);
+    // outerDiv.appendChild(containerDiv2);
     outerDiv.appendChild(containerDiv3);
-    outerDiv.appendChild(buttonDiv1);
+    // outerDiv.appendChild(buttonDiv1);
 
     tab.appendChild(outerDiv);
 }
@@ -794,10 +793,8 @@ function createTableTask(tabId, id, taskID, strategy, task, undoButton) {
 function updateTaskTable(tabId) {
     var tab = document.getElementById(tabId);
     tab.innerHTML = ''; 
-
-    currentTaskList.forEach((task, index) => {
-        createTableTask(tabId, index+1, task.taskID, task.strategy, task.taskLabel, 'Undo');
-    });
+    var task = currentTaskList[currentTaskList.length - 1];
+    createTableTask(tabId, 0, task.taskID, task.strategy, task.taskType, 'Undo');
 }
 
 function removeTask(taskID) {
@@ -1022,7 +1019,6 @@ function setupSocket(webSocket)
             message_content = message_content.split(":")[1]
             var message_fields = message_content.split(",")
             addTask(message_fields[1], message_fields[0], message_fields[2])
-            //createTableTask("taskCanvas", message_fields[0], strategySelected, message_fields[1], "undo")
         } 
 
         if(message_content.startsWith("autonomousRole")){

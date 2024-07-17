@@ -1,7 +1,7 @@
 # IP Addresses
-robot_ip: "192.168.19.22"       # LUIGI IP Address
+robot_ip: "10.0.19.31"          # LUIGI IP Address
 local_ip: "0.0.0.0"             # My IP Address
-my_ip: "192.168.19.1"
+my_ip: "10.0.255.230"
 
 # Ports
 debug_receive_port: 65305
@@ -20,7 +20,7 @@ command_offset: 10
 debug: true
 
 # Maximum Number of Obstacles
-max_obstacles: 6
+max_obstacles: 20
 
 # Command Format
 # 1B: Command body
@@ -39,21 +39,24 @@ command_format: "<BBBff"
 # 6-9)    3f (12B) [pos_x, pos_y, theta]
 # 9)      1f (4B) ball_age
 # 10-12)  2f (8B) [ball_pos_x, ball_pos_y]
-# 12)     1B player_role
-# 13)     1B num_of_data_bytes
+# 12)     1H (2B) num_of_data_bytes
+# 13)     1B player_role
 # 14)     1B current_obs_size
-# 15-21)  6B obstacle_types  
-# 21)     1B padding
-# 22-24)  2B padding
-# 24-30)  6f (12B) obs_center_x
-# 30-36)  6f (12B) obs_center_y
-# 36-42)  6f (12B) obs_last_seen
-# 42)     1H (2B) message_budget
-# 43)     1H (2B) secs_remaining
-# 44-46)  2B arm_contact
-# 46-48)  2B arm_push_direction
-# 48-50)  2f (8B) arm_time_of_last_contact
-data_format: "<d4sBBBB3ff2fBBB6BB2B6f6f6fHH2B2B2f"
+# 15-35)  20B obstacle_types  
+# 35-55)  20f (80B) obs_center_x
+# 55-75)  20f (80B) obs_center_y
+# 75-95)  20f (80B) obs_last_seen
+# 95)     1H (2B) message_budget
+# 96)     1H (2B) secs_remaining
+# 96-98)  2B arm_contact
+# 98-100) 2B arm_push_direction
+# 100-102)2f (8B) arm_time_of_last_contact
+# 102)    2f (8B) padding (whistle)
+# 103-105) 2f (8B) teamball
+# 105-107) 2f (8B) teamballvel
+# 107)    12B padding
+
+data_format: "<d4sBBBB3ff2fHBB20B20f20f20fHH2B2B2f2f2f2f12B"
 
 # Image Size
 upper_image_width: 640

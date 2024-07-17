@@ -5,6 +5,8 @@ from enums import DataEntryIndex, PlotId, ObstacleType
 from debug_info import DebugInfo
 import numpy as np
 from socket_thread import SocketThread
+from datetime import datetime
+import json
 
 class DebugInfoReceiver(SocketThread):
     def __init__(self, config: OmegaConf, debuginfo: DebugInfo):
@@ -13,6 +15,9 @@ class DebugInfoReceiver(SocketThread):
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._server_socket.bind((config.local_ip, config.debug_receive_port))
         self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._log_fname = f"debug_packet_log-{datetime.now().isoformat(timespec='seconds')}.json"
+        with open(self._log_fname, "w") as f:
+            pass  # create / clear file right now
     
     @property
     def server_socket(self):
@@ -32,6 +37,10 @@ class DebugInfoReceiver(SocketThread):
         """
         while not self.stop_threads.is_set():
             debug_packet = self.receive_from_cpp()
+
+            with open(self._log_fname, "a") as f:
+                json.dump(debug_packet, f)
+                f.write("\n")
             
             self.debuginfo.save_controlled_robot_pose(
                 debug_packet[DataEntryIndex.PosX.value], 

@@ -15,7 +15,7 @@ class DebugInfoReceiver(SocketThread):
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._server_socket.bind((config.local_ip, config.debug_receive_port))
         self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._log_fname = f"debug_packet_log-{datetime.now().isoformat(timespec='seconds')}.json"
+        self._log_fname = f"debug_packet_log-{datetime.now().isoformat(timespec='seconds')}.jsonl"
         with open(self._log_fname, "w") as f:
             pass  # create / clear file right now
     

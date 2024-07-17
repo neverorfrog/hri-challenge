@@ -518,7 +518,7 @@ function startRenderingLoop() {
 
     console.log("START RENDER");
     var lastRender = 0;
-    var interval = 200; // interval in milliseconds
+    var interval = 30; // interval in milliseconds
 
     function renderingLoop(timestamp) {
         if (!CLIENT_ENABLED) return;

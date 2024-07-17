@@ -36,18 +36,22 @@ class DataEntryIndex(Enum):
     BallAge = 9
     BallPosX = 10
     BallPosY = 11
-    PlayerRole = 12
-    NumDataBytes = 13
+    NumDataBytes = 12
+    PlayerRole = 13
     CurrentObstacleSize = 14
     ObstacleTypes = 15
-    ObstacleCenterX = 24
-    ObstacleCenterY = 30
-    ObstacleLastSeen = 36
-    MessageBudget = 42
-    SecsRemaining = 43
-    ArmContact = 44
-    ArmContactPos = 46
-    ArmTimeOfLastContact = 48
+    ObstacleCenterX = 35
+    ObstacleCenterY = 55
+    ObstacleLastSeen = 75
+    MessageBudget = 95
+    SecsRemaining = 96
+    ArmContact = 97
+    ArmContactPos = 99
+    ArmTimeOfLastContact = 101
+    Suca2 = 103
+    TeamBall = 104
+    TeamBallVel = 106
+    Suca3 = 108
     
 class ObstacleType(Enum):
     Nothing = -1

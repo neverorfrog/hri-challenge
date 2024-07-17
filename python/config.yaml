@@ -1,5 +1,5 @@
 # IP Addresses
-robot_ip: "10.0.19.31"          # LUIGI IP Address
+robot_ip: "10.0.19.28"          # LUIGI IP Address
 local_ip: "0.0.0.0"             # My IP Address
 my_ip: "10.0.255.230"
 
@@ -48,13 +48,13 @@ command_format: "<BBBff"
 # 75-95)  20f (80B) obs_last_seen
 # 95)     1H (2B) message_budget
 # 96)     1H (2B) secs_remaining
-# 96-98)  2B arm_contact
-# 98-100) 2B arm_push_direction
-# 100-102)2f (8B) arm_time_of_last_contact
-# 102)    2f (8B) padding (whistle)
-# 103-105) 2f (8B) teamball
-# 105-107) 2f (8B) teamballvel
-# 107)    12B padding
+# 97-99)  2B arm_contact
+# 99-101) 2B arm_push_direction
+# 101-103)2f (8B) arm_time_of_last_contact
+# 103)    2f (8B) padding (whistle)
+# 104-106) 2f (8B) teamball
+# 106-108) 2f (8B) teamballvel
+# 108)    12B padding
 
 data_format: "<d4sBBBB3ff2fHBB20B20f20f20fHH2B2B2f2f2f2f12B"
 

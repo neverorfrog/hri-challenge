@@ -7,6 +7,7 @@ import numpy as np
 from socket_thread import SocketThread
 from datetime import datetime
 import json
+import os
 
 class DebugInfoReceiver(SocketThread):
     def __init__(self, config: OmegaConf, debuginfo: DebugInfo):
@@ -15,7 +16,12 @@ class DebugInfoReceiver(SocketThread):
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._server_socket.bind((config.local_ip, config.debug_receive_port))
         self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._log_fname = f"debug_packet_log-{datetime.now().isoformat(timespec='seconds')}.jsonl"
+        # Create the logs folder if it doesn't exist
+        self._log_foldername = "logs"
+        self._log_fname = f"{self._log_foldername}/debug_packet_log-{datetime.now().isoformat(timespec='seconds')}.jsonl"
+        logs_folder = os.path.dirname(self._log_foldername)
+        if not os.path.exists(self._log_foldername):
+            os.makedirs(self._log_foldername)
         with open(self._log_fname, "w") as f:
             pass  # create / clear file right now
     
@@ -37,9 +43,8 @@ class DebugInfoReceiver(SocketThread):
         """
         while not self.stop_threads.is_set():
             debug_packet = self.receive_from_cpp()
-
             with open(self._log_fname, "a") as f:
-                json.dump(debug_packet, f)
+                json.dump(debug_packet[2:], f)
                 f.write("\n")
             
             self.debuginfo.save_controlled_robot_pose(

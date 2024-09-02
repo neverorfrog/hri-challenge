@@ -3,7 +3,8 @@ import numpy as np
 import cv2
 import os
 from omegaconf import OmegaConf
-from util import load_config
+
+from communication.utils import load_config
 
 here = os.path.dirname(os.path.abspath(__file__))
 config_path = os.path.join(here, "config.yaml")

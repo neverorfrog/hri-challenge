@@ -1,13 +1,13 @@
 import socket
 import struct
 from omegaconf import OmegaConf
-from enums import DataEntryIndex, PlotId, ObstacleType
-from debug_info import DebugInfo
 import numpy as np
-from socket_thread import SocketThread
 from datetime import datetime
 import json
 import os
+
+from communication.utils.enums import DataEntryIndex, PlotId, ObstacleType
+from communication.utils import DebugInfo, SocketThread
 
 class DebugInfoReceiver(SocketThread):
     def __init__(self, config: OmegaConf, debuginfo: DebugInfo):

@@ -1,7 +1,7 @@
 import socket
 import struct
-from enums import Command
-from socket_thread import SocketThread
+
+from communication.utils import Command, SocketThread
 
 class CommandSender(SocketThread):
     def __init__(self, config):

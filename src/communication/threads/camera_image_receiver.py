@@ -1,9 +1,10 @@
 import socket
 import threading
 from omegaconf import OmegaConf
-from enums import CameraType
 import numpy as np
 import cv2
+
+from communication.utils.enums import CameraType
 
 class CameraImageReceiver(threading.Thread):
     def __init__(self, config: OmegaConf, camera: CameraType):

@@ -4,3 +4,5 @@
 *.gz
 *.toc
 *.jpg
+
+__pycache__/

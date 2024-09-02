@@ -1,5 +1,5 @@
-from enums import ObstacleType
-from ringbuffer import RingBuffer, RingBuffer
+from .enums import ObstacleType
+from .ringbuffer import RingBuffer, RingBuffer
 import numpy as np
 
 W = 10 # window size

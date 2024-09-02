@@ -1,0 +1,3 @@
+[submodule "src/world-model"]
+	path = src/world-model
+	url = https://github.com/torchipeppo/rc2024-wm.git

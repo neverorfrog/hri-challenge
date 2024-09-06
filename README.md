@@ -43,3 +43,11 @@ Information from the cameras is received, processed and sent to the operator’s
 - move the robot using WASD/arrows or the joypad (the robot should return on the original path when the command isn't provided anymore?)
 - change the parameters of the path planner (e.g. increase/decrease the minimum distance to avoid obstacles, i.e. be more conservative/rough)
 - increase/decrease the speed of the robot
+
+## Dependencies
+
+### Speech Recognition
+
+```
+sudo apt-get install portaudio19-dev python-all-dev python3-all-dev
+```

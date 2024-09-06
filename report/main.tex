@@ -1,5 +1,5 @@
-\documentclass[a4paper, onecolumn, 11pt]{article}
-\usepackage[left=32mm,right=32mm,top=35mm,columnsep=15pt]{geometry} 
+\documentclass[a4paper, onecolumn, 12pt]{article}
+\usepackage[left=33mm,right=33mm,top=35mm,columnsep=15pt]{geometry} 
 
 % basic packages
 \usepackage[english]{babel} %language
@@ -40,25 +40,81 @@
 % \usepackage[normalem]{ulem}
 % \useunder{\uline}{\ul}{}
 
-\title{Boh}
+\title{Remote Interaction with a Nao Humanoid \\ Elective in AI / HRI Report}
 \author{Flavio Maiorana \and Valerio Spagnoli \and Flavio Volpi}
 \date{\today}
 
 \begin{document}
 
 \maketitle
-\begin{abstract}
-    Ciao
-\end{abstract}
 
-\newpage
-\tableofcontents
-
-\newpage
 \section{Introduction}
+\label{sec:intro}
 
+In the context of RoboCup games, robots are fully autonomous and are not allowed
+to receive any external help from humans. However, in a world where robots are
+used in everyday life, they are of course used in collaboration with humans.
+Moreover, the RoboCup 2050 challenge aims to have a football match between the
+winning team of the RoboCup and the human winning team of the FIFA World Cup. In
+this project, we aim to make a very small step in that direction by developing a
+system that allows a human operator to remotely control and interact with a Nao
+Humanoid through a graphical interface and a web socket. This pipeline was
+specifically designed to be used in the RoboCup 2024 SPL challenge, where the
+goal was to make two teams of robots play against each other, where one robot of
+each team is controlled by a human operator.
+
+\subsection{Objectives}
+\label{sec:obj}
+
+The main objective of the project is to develop that allows the human operator
+to use the robot as a proxy to interact with the environment, namely the soccer
+field. To do this, there is of course to need to have some form of bidirectional
+interaction between the human operator and the controlled robot. The human needs
+to be completely aware of the robot's surroundings, that is, the human can
+perceive the robot's surroundings only through the robot's sensors. The robot,
+on the other hand, has to be able to receive commands from the human operator
+and execute them in real-time. The robot should also be able to send feedback to
+the human operator in real-time. 
+
+\todo[inline]{Allungare un po' il brodo}
+
+\section{Solution}
+\label{sec:sol}
+
+We opted for a solution that prioritizes high-level commands and audio-visual
+feedback. The main component of the system is the graphical interface. It is
+made by a bunch of buttons that allow the human operator to send commands to the
+robot and a 2D representation of the field that shows the robot's position and
+some perception information.  
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{assets/interface.png}
+    \caption{The graphical interface}
+    \label{fig:interface}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{assets/simrobot.png}
+    \caption{The Corresponding Field Configuration}
+    \label{fig:nao}
+\end{figure}
+
+\section{Implementation}
+\label{sec:impl}
+
+\todo[inline]{Dettagli sul codice}
+
+\section{Results}
+\label{sec:res}
+
+\todo[inline]{Non so che cavolo metterci qui}
 
 \section{Conclusion}
+\label{sec:con}
+
+\todo[inline]{Amen}
 
 \bibliographystyle{unsrt}
 \bibliography{references}

@@ -1,19 +1,12 @@
 import socket
 import numpy as np
 import cv2
-import os
 from omegaconf import OmegaConf
 
-from communication.utils import load_config
-
-
-here = os.path.dirname(os.path.abspath(__file__))
-config_path = os.path.join(here, "config.yaml")
-config: OmegaConf = load_config(config_path)
-MY_IP = config.my_ip
-port = config.upper_image_receive_port
-
-def start_server():
+def start_server(config: OmegaConf):
+    
+    MY_IP = config.my_ip
+    port = config.upper_image_receive_port
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -50,6 +43,3 @@ def start_server():
             print(f"Errore durante la comunicazione: {e}")
         finally:
             client_socket.close()
-
-if __name__ == "__main__":
-    start_server()

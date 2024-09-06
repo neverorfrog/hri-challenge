@@ -25,14 +25,6 @@ class DebugInfoReceiver(SocketThread):
         with open(self._log_fname, "w") as f:
             pass  # create / clear file right now
     
-    @property
-    def server_socket(self):
-        return self._server_socket
-    
-    @property
-    def client_socket(self):
-        return self._client_socket
-
     def update(self):
         """
         RECEIVES messages from C++ and sends them to a JavaScript server.

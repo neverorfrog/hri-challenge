@@ -38,10 +38,10 @@ def main():
     
     command_sender = CommandSender(config)
     debug_info_receiver = DebugInfoReceiver(config, debuginfo)
-    upper_image_receiver = CameraImageReceiver(config, "upper")
-    lower_image_receiver = CameraImageReceiver(config, "lower")
+    # upper_image_receiver = CameraImageReceiver(config, "upper")
+    # lower_image_receiver = CameraImageReceiver(config, "lower")
     node_thread = threading.Thread(target=run_node_script)
-    threads: List[threading.Thread] = [debug_info_receiver, command_sender, upper_image_receiver, lower_image_receiver, node_thread]
+    threads: List[threading.Thread] = [debug_info_receiver, command_sender, node_thread]
     
     for thread in threads:
         thread.start()

@@ -5,10 +5,11 @@ import numpy as np
 import cv2
 
 from communication.utils.enums import CameraType
+from communication.utils.socket_thread import SocketThread
 
-class CameraImageReceiver(threading.Thread):
+class CameraImageReceiver(SocketThread):
     def __init__(self, config: OmegaConf, camera: CameraType):
-        super().__init__()
+        super().__init__(config)
         self.stop_threads = threading.Event()
         self.camera = camera
         self.config = config
@@ -19,14 +20,16 @@ class CameraImageReceiver(threading.Thread):
             self.img_height = config.lower_image_height
             self.img_width = config.lower_image_width
         self.img_size = self.img_height * self.img_width
-        
+        self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._server_socket.bind((self.config.local_ip, self.config.upper_image_receive_port))
+        self._server_socket.listen(5)
         
     def update(self):
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.bind((self.config.my_ip, self.config.upper_image_receive_port))
-        server_socket.listen(5)
+        self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._server_socket.bind((self.config.local_ip, self.config.upper_image_receive_port))
+        self._server_socket.listen(5)
         while not self.stop_threads.is_set():
-            client_socket, addr = server_socket.accept()
+            client_socket, addr = self._server_socket.accept()
             print(f"Connessione accettata da {addr}")
             if addr[0] == self.config.robot_ip:
                 self.receive_image(client_socket)

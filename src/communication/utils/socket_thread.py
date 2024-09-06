@@ -1,5 +1,4 @@
 import threading
-import socket
 from abc import abstractmethod, ABC
 
 class SocketThread(threading.Thread, ABC):
@@ -39,13 +38,9 @@ class SocketThread(threading.Thread, ABC):
         print("Sockets closed and threads stopped.")
         
     @property
-    @abstractmethod
-    def server_socket(self) -> socket.socket:
-        """Abstract property representing the server socket."""
-        pass
+    def server_socket(self):
+        return self._server_socket
     
     @property
-    @abstractmethod
-    def client_socket(self) -> socket.socket:
-        """Abstract property representing the client socket."""
-        pass
+    def client_socket(self):
+        return self._client_socket

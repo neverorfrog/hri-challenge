@@ -9,14 +9,6 @@ class CommandSender(SocketThread):
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._server_socket.bind((config.local_ip, config.command_receive_port))
         self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        
-    @property
-    def server_socket(self):
-        return self._server_socket
-    
-    @property
-    def client_socket(self):
-        return self._client_socket
 
     def update(self):
         """

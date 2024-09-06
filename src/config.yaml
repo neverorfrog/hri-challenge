@@ -1,7 +1,7 @@
 # IP Addresses
-robot_ip: "10.0.19.30"          # LUIGI IP Address
-local_ip: "0.0.0.0"             # My IP Address
-my_ip: "10.0.19.90"
+robot_ip: "127.0.0.1"          # LUIGI IP Address
+local_ip: "127.0.0.1"             # My IP Address
+my_ip: "127.0.0.1"
 
 # Ports
 debug_receive_port: 65305

@@ -105,10 +105,27 @@ controlled by three threads:
 
 The two main components for the collection and storage of information from the environment
 are called Representations and Modules.
-The former stores the information at the current instant, and they represent the actual overview
+Representations store informations at the current instant, and they represent the actual overview
 of the world. Each representation is a derived class of the class $Streamable$, which allows a 
-direct connection of all attributes and functions of our representation with all other
-representations and modules.
+direct connection of all attributes and functions of the given representation with all other
+representations and modules. Furthermore, each representation has a single module provider, which
+is the only capable of modifying its attributes.
+
+Instead, the task of the modules is to make computations which require specific inputs and returns
+determined output. In details, a module can specify the representations it needs in input through
+the macros REQUIRES and USES, and must specify the representations it is going to modify through
+the macro PROVIDES. A module must specify a function named $update$, that has the scope to 
+perform the real updates of the informations inside the provided representations
+
+The correct usage of REQUIRES and USES is established by a scheduler inside the software, which decides 
+which is the right execution order of the modules according to cyclic dependencies between representations.
+For example,
+\todo[inline]{@FLAVIO V. : inserire esempio di moduli/rappresentazioni}
+
+
+
+
+
 
 We opted for a solution that prioritizes high-level commands and audio-visual
 feedback. The main component of the system is the graphical interface. It is

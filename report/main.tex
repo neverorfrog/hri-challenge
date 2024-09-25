@@ -51,21 +51,29 @@
 \section{Introduction}
 \label{sec:intro}
 
-In the context of RoboCup games, robots are fully autonomous and are not allowed
-to receive any external help from humans. However, in a world where robots are
-used in everyday life, they need to collaborate with humans.
-Moreover, the RoboCup 2050 challenge aims to have a football match between the
-winning team of the RoboCup and the human winning team of the FIFA World Cup. In
-this project, we aim to make a very small step in that direction by developing a
-system that allows a human operator to remotely control and interact with a Nao
-Humanoid through a graphical interface and a web socket. This pipeline was
-specifically designed to be used in the RoboCup 2024 SPL challenge, where two robots
-of one team had to compete against two robots of the opponent team, and one of the
-two robots for each team was controlled by a human operator. Furthermore, the rules
-of the challenge forced the human operator to turn his back to the field, in order
-to not directly observe the environment. This constricts us to make use of the 
-directional robot-human communication also for the reconstruction of the world model,
-useful for the human to decide commands to provide to the controlled robot.
+In the context of RoboCup games, robots are fully autonomous. However, they
+surely could benefit from interaction with humans. For example, human soccer
+players benefit from receiving suggestions and sometimes even explicit
+instructions on what to do during the match. Similarly, an autonomous soccer
+robot could receive informed suggestions to enhance its planning
+\todo[inline]{Andrebbe detta meglio sta cosa}. In this project, we aim to make a
+small step in that direction by developing a system that allows a human operator
+to remotely control and interact with a Nao Humanoid through a graphical
+interface. 
+
+\subsection{Context and Motivation}
+\label{sec:context}
+
+Receiving instructions from a coach can be a game-changer in a soccer match. And
+also, receiving feedback from the robot when issuing a command drastically
+improves the interaction quality. This project was specifically designed to be
+used in the RoboCup 2024 SPL challenge, where two robots of one team had to
+compete against two robots of the opponent team, and one of the two robots for
+each team was controlled by a human operator. Furthermore, the rules of the
+challenge forced the human operator to turn his back to the field, in order to
+not directly observe the environment. This constrained us to make use of the
+directional robot-human communication also for the reconstruction of the world
+model.
 
 
 \subsection{Objectives}
@@ -84,13 +92,74 @@ the human operator in real-time.
 \todo[inline]{Spingerei anche sul fatto che il tutto deve essere utilizzabile in un 
 ambiente competitivo}
 
+\subsection{Summary of the results}
+\label{sec:summary}
+
+Our system achieved the objective of allowing a human operator to control a Nao
+by voice and using a graphical interface, and to receive feedback from the robot
+in response to the commands. The system integrates various modules, such as:
+\begin{itemize}
+    \item \textbf{Communication}, which manages the communication between the robot and
+    the human operator
+    \item \textbf{Mental model}, responsible for representing the field by
+    accessing only the robot's perceptions
+    \item \textbf{Interaction}, by answering to the commands before executing
+    them, considering also the feasibility of the execution itself
+    \item \textbf{Memory}, the past command is held in memory, in order to
+    resume it in case it is needed
+\end{itemize}
+The system was tested in the RoboCup 2024 SPL challenge, where SQPR Team reached
+the third place, demonstrating the effectiveness of the system in a competitive
+environment.
+
+\newpage
+
+\section{Related Work}
+\label{sec:rel}
+
+Interpreting human signals has been a challenge for some time now in Robotics.
+Humans communicate through various modalities, including vision, audio, and
+motion. This multimodal nature provides rich information that sensory inputs can
+capture and analyze. 
+
+Recent advances in Deep Learning have facilitated the
+integration of multimodal data, significantly improving the comprehension of
+relationships within individual modalities, a key factor for precise message
+interpretation \cite{LIU20183} \cite{su2023recent}.
+
+In RoboCup Soccer, human-robot interaction is predominantly one-way, with human
+referees conveying game states and events to robots. A significant trend in the
+RoboCup SPL is the progressive reduction of network communication in
+favor of human-like signal interpretation, allowing robots to interpret human
+signals more naturally. \cite{digiambattista}
+
+A notable case worth to mention is also \cite{antonioni}, where they propose an
+approach to improve the decision making process through the audience noise by
+extracting relevant features through MFCC coefficients and applying a
+reinforcement learning pipeline. 
+
+This case could fall into a broader category where the goal is to improve the
+communication from an ideal coach to the robot in order to improve planning and
+decision-making. In particular, \cite{musumeci} tackles this problem by
+designing a system that enriches the planning process with temporal goals and
+constraints given by human indications. 
+
+Our work is inspired by these studies, and the goal is to develop a system that
+allows a human operator to have a one-to-one interaction with a robot, acting
+like a coach in a soccer match.
+
+\newpage
 \section{Solution}
 \label{sec:sol}
 
-\subsection{BHuman}
-\todo[inline]{Cambiare nome alla sezione}
+The system can be divided in two main parts: the framework backbone, written in
+C++, which runs on the robot itself, and the interface, written in Python and
+Nodejs, responsible for issuing commands to the robot and receiving feedback or
+sensory information. 
+
+\subsection{Framework backbone}
 The framework on which everything stands on is derived from that one of the
-German team B-Human \cite{}, University of Bremen. At low level, the robot is 
+German team B-Human \cite{bhuman2023}, University of Bremen. At low level, the robot is 
 controlled by three threads:
 \begin{itemize}
     \item Cognition: it is responsible for collecting all informations from the 
@@ -122,16 +191,41 @@ which is the right execution order of the modules according to cyclic dependenci
 For example,
 \todo[inline]{@FLAVIO V. : inserire esempio di moduli/rappresentazioni}
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{assets/flowchart.png}
+    \label{fig:flowchart}
+    \caption{Complete pipeline of the game states}
+\end{figure}
+
+\subsubsection{Memory}
+
+\todo[inline]{Boh}
+
+\subsubsection{Social Reasoning}
+
+An important aspect of RoboCup SPL games are the game rules. These are conceived
+from year to year to shift the games to be more realistic. If we want, they
+could be considered as a form of social rules which the robots need to obey to
+while playing. Depending on the game state, some actions are not permitted. For
+instance, in SET the robots are not allowed to move. Similarly, one could impose
+a rule that avoids the robot to score in its own goal, even if it is requested
+to. Of course, in order to to some adequate social reasoning, it is necessary
+for the robot to have a sufficiently detailed model of the game state and the
+field.
+
+\subsubsection{Mental Modeling}
+
+\todo[inline]{Come rappresenta il mondo il robot? Stato del gioco e del campo fisico}
 
 
 
-
+\subsection{Interface}
 
 We opted for a solution that prioritizes high-level commands and audio-visual
-feedback. The main component of the system is the graphical interface. It is
-made by a bunch of buttons, that allow the human operator to send commands to the
-robot, and a 2D representation of the field that shows the robot's position and
-its recosntruction of the world.  
+feedback. The graphical interface is made by a bunch of buttons, that allow the
+human operator to send commands to the robot, and a 2D representation of the
+field that shows the robot's position and its recosntruction of the world.  
 
 \begin{figure}[H]
     \centering
@@ -150,12 +244,25 @@ its recosntruction of the world.
 \section{Implementation}
 \label{sec:impl}
 
-\todo[inline]{Dettagli sul codice}
+\subsection{Speech-to-Text Module}
+
+\todo[inline]{Blablabla}
+
+\subsection{Interface}
+
+
+\subsection{Framework}
+
+
 
 \section{Results}
 \label{sec:res}
 
-\todo[inline]{Non so che cavolo metterci qui}
+\todo[inline]{Blocco 6 delle slide di iocchi}
+
+\section{Experimental Evaluation}
+
+\todo[inline]{Blocco 6 delle slide di iocchi anche qui}
 
 \section{Conclusion}
 \label{sec:con}

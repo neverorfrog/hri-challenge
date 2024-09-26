@@ -75,6 +75,8 @@ not directly observe the environment. This constrained us to make use of the
 directional robot-human communication also for the reconstruction of the world
 model.
 
+\todo[inline]{Qua si puó dire di piú}
+
 
 \subsection{Objectives}
 \label{sec:obj}
@@ -241,17 +243,233 @@ field that shows the robot's position and its recosntruction of the world.
     \label{fig:nao}
 \end{figure}
 
+\newpage
 \section{Implementation}
 \label{sec:impl}
+
+From an implementative point of view, the system can be divided in four modules: 
+\begin{itemize}
+    \item \textbf{Communication Layer}: exchanges messages between the robot and the human operator
+    \item \textbf{Framework}: the backbone of the system, which runs on the robot
+    \item \textbf{GUI}: the graphical interface that allows the human operator to interact with the robot
+    \item \textbf{Speech-to-Text Module}: the module that converts the human operator's voice commands to text
+\end{itemize}
+
+These modules are wrapped around the two main data structs that encapsulate the
+exchanged messages, namely the \textit{HumanCommand} struct and the
+\textit{DebugInfo} struct. The former is used to send commands from the human
+operator to the robot. It has the following structure:
+\begin{verbatim}
+    1B: Command body
+    1B: Command head
+    1B: Strategy
+    8B: [pos_x, pos_y]
+    command_format: "<BBBff"
+\end{verbatim}
+
+Basically, it is formatted as a tuple of 5 elements, where the first three are
+Bytes and the last two are floats. The last two elements are the coordinates of
+the target position, which are indicated on the 2D field. This precise structure
+is needed to be able to send the command through the socket and parse it on the
+C++ side.
+
+The \textit{DebugInfo} struct, on the other hand, is used to send feedback from
+the robot to the human operator. It has the following structure:
+
+\begin{verbatim}
+1)      4B header
+2)      1B version
+3)      1B player_num
+4)      1B team_num
+5)      1B fallen
+6-9)    3f (12B) [pos_x, pos_y, theta]
+9)      1f (4B) ball_age
+10-12)  2f (8B) [ball_pos_x, ball_pos_y]
+12)     1H (2B) num_of_data_bytes
+13)     1B player_role
+14)     1B current_obs_size
+15-35)  20B obstacle_types  
+35-55)  20f (80B) obs_center_x
+55-75)  20f (80B) obs_center_y
+75-95)  20f (80B) obs_last_seen
+95)     1H (2B) message_budget
+96)     1H (2B) secs_remaining
+97-99)  2B arm_contact
+99-101) 2B arm_push_direction
+101-103)2f (8B) arm_time_of_last_contact
+103)    2f (8B) padding (whistle)
+104-106) 2f (8B) teamball
+106-108) 2f (8B) teamballvel
+108)    12B padding
+
+data_format: "<d4sBBBB3ff2fHBB20B20f20f20fHH2B2B2f2f2f2f12B"
+\end{verbatim}
+
+This data packet contains all the information that is needed to have a graphical
+representation of the robot's mental model of the field. \todo[inline]{Spiegare un po'}
+
+\subsection{Communication Layer}
+
+The communication layer is responsible for the exchange of messages between the
+robot and the human operator. It is written in Python and based on UDP sockets. 
+
+\begin{verbatim}
+def send_command_to_cpp(self, command: int, strategy: int, x: int, y: int):
+    if command_number > self.config.command_offset:
+        command_body_number = Command.Null.value
+        command_head_number = command_number - self.config.command_offset
+    else:
+        command_body_number = command_number
+        command_head_number = Command.Null.value
+    encoded_data = struct.pack(
+        self.config.command_format,
+        command_body_number,
+        command_head_number,
+        strategy_number,
+        x_position,
+        y_position
+    )
+    try:
+        client_socket.sendto(encoded_data, (robot_ip, command_send_port))
+        print(f"Sending message to C++: {encoded_data}")
+    except Exception as e:
+        print(f"Error in send_message: {e}")
+\end{verbatim}
+
+This function sends a command that is received from the GUI to the robot. The
+receive function from nodejs is the following:
+
+\begin{verbatim}
+def receive_command_from_js(self) -> tuple[int, int, int, int]:
+    try:
+        data, addr = self.server_socket.recvfrom(1024)
+    except Exception as e:
+        print(f"Error in receiving the message: {e}")
+    try:
+        message = data.decode()
+    except UnicodeDecodeError:
+        print(f"Received non-UTF-8 message from JavaScript: {data} from {addr}")
+    message_split = message.split('|')[1]
+    content_message = message_split.split(',')
+    task_type = content_message[2]
+    command_number = Command[task_type].value
+    strategy_number = int(content_message[5])
+    task_label = content_message[4]
+    selection = content_message[1]
+    print(f"Task Label: {task_label}")
+    if selection == "selection":
+        x_position = int(content_message[6])
+        y_position = int(content_message[7])
+        print(f"X Position: {x_position}")
+        print(f"Y Position: {y_position}")
+    else:
+        x_position = 0
+        y_position = 0
+    return command_number, strategy_number, x_position, y_position
+\end{verbatim}
+Basically, the python scripts receives a command in form of a string from the
+GUI, unpacks it, puts it into a serialized format and sends it to the robot.
+
+
+\subsection{Framework}
+
+The framework is the backbone of the system. The two main functions are the
+update of the CommandReceiver and the update of the DebugMessageHandler (which
+sends sensory information). The CommandReceiver is responsible for updating the
+representation HumanCommand, while giving some audio feedback to the human about
+the received command. In the following function, the command is parsed,
+converted to enums and stored in the HumanCommand representation. 
+
+\begin{verbatim}
+void CommandReceiver::update(HumanCommand& command) {
+  
+  if (theRobotInfo.number != RobotInfo::RoleNumber::controlled) return;
+  
+  char buffer[BUFFER_SIZE];
+  int n = socket_read.read(buffer, BUFFER_SIZE);
+  
+  // First field (command_body): unsigned char
+  HumanCommand::CommandBody received_command_body = 
+      static_cast<HumanCommand::CommandBody>(buffer[0]);
+  
+  // Second field (command_head): unsigned char
+  HumanCommand::CommandHead received_command_head = 
+      static_cast<HumanCommand::CommandHead>(buffer[1]);
+  
+  // Third field (strategy): unsigned char
+  HumanCommand::Strategy strategy = 
+      static_cast<HumanCommand::Strategy>(buffer[2]);
+  
+  // Fourth field (x_pos): int (4 bytes)
+  float x_pos;
+  std::memcpy(&x_pos, buffer + 3, sizeof(x_pos));
+  
+  // Fifth field (y_pos): int (4 bytes)
+  float y_pos;
+  std::memcpy(&y_pos, buffer + 7, sizeof(y_pos));
+  
+  if (n > 0) {
+      SystemCall::say(HumanCommand::CommandBody2String(received_command_body));
+  
+      if(received_command_body != HumanCommand::CommandBody::BaseCommandBody){
+          command.commandBody = received_command_body;
+          command.x = x_pos;
+          command.y = y_pos;
+      }
+      if(received_command_head != HumanCommand::CommandHead::BaseCommandHead)
+          command.commandHead = received_command_head;
+  
+      command.strategy = strategy;
+  }
+  return;
+}
+\end{verbatim}
+
+Once the command is stored in the HumanCommand representation, it is used by the
+specific behavior we designed for the interacting robot. The update function
+iterates over the possible commands (defined as an enumeration) in the start
+state with a switch, executing the corresponding skill for each command. For
+instance:
+
+\begin{verbatim}
+state(pass)
+{
+    transition
+    {
+    if (theHumanCommand.commandBody != HumanCommand::CommandBody::Pass)
+        goto start;
+    }
+
+    action
+    {
+    int num = theTeamData.numberOfActiveTeammates;
+    int size = theTeamData.teammates.size();
+    if(num > 0){
+        theSaySkill("Pass the ball");
+        Vector2f target = theTeamData.teammates[0].theRobotPose.translation;
+        KickInfo::KickType kickType = theLibPass.getKickType(target);
+        float distance = theLibMisc.distance(target, theRobotPose);
+        theGoToBallAndKickSkill(calcAngleToTarget(target), 
+            kickType, true, distance);
+    }
+    else{
+        theSaySkill("Go to ball and dribble");
+        theGoToBallAndDribbleSkill(calcAngleToTarget(
+            theLibStriker.strikerMovementPoint()));
+    }
+    }
+}
+\end{verbatim}
+
+Whenever a new command is received, the robot answers with an audio feedback and
+reiterates over the command list. 
+
 
 \subsection{Speech-to-Text Module}
 
 \todo[inline]{Blablabla}
 
 \subsection{Interface}
-
-
-\subsection{Framework}
 
 
 

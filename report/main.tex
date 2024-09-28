@@ -162,18 +162,20 @@ sensory information.
 \subsection{Framework backbone}
 The framework on which everything stands on is derived from that one of the
 German team B-Human \cite{bhuman2023}, University of Bremen. At low level, the robot is 
-controlled by three threads:
+controlled by four threads:
 \begin{itemize}
+    \item Upper camera thread: it deals with upper camera of the robot, positioned on its forehead;
+    \item Lower camera thread: it deals with lower camera of the robot, placed on its chin;
     \item Cognition: it is responsible for collecting all informations from the 
-    environment through cameras and sensors; also, it takes images and informations as input,
-    and returns high level commands about the actions the robot has to execute;
+    environment through cameras and sensors; also, using some informations as input,
+    it returns high level commands about the actions the robot has to execute;
     \item Motion: it converts high level commands of the thread Cognition in effective
-    motion of the robot;
-    \item Debug: it allows a communication between the robot and the host pc for the 
-    transmission of debugging information.
+    motion control of the 25 joints of the robot;
 \end{itemize}
-\todo[inline]{aggiungere immagine dei processi}
+Both camera threads capture images from the cameras of the robot, and work on them 
+to retrieve informations to describe the world.
 
+\subsubsection{Representations and Modules}
 The two main components for the collection and storage of information from the environment
 are called Representations and Modules.
 Representations store informations at the current instant, and they represent the actual overview
@@ -186,12 +188,40 @@ Instead, the task of the modules is to make computations which require specific 
 determined output. In details, a module can specify the representations it needs in input through
 the macros REQUIRES and USES, and must specify the representations it is going to modify through
 the macro PROVIDES. A module must specify a function named $update$, that has the scope to 
-perform the real updates of the informations inside the provided representations
+perform the real updates of the informations inside the provided representations.
 
 The correct usage of REQUIRES and USES is established by a scheduler inside the software, which decides 
-which is the right execution order of the modules according to cyclic dependencies between representations.
-For example,
-\todo[inline]{@FLAVIO V. : inserire esempio di moduli/rappresentazioni}
+the right execution order of the modules according to cyclic dependencies between representations.
+For example, if a module M1 updates the representation R1, and this representation is required from 
+module M2 to modify its representation, the module M2 cannot be executed before the module M1, so the
+scheduler will execute in order M1 and M2. 
+\todo[inline]{aggiungere immagine di due moduli che richiedono rappresentazioni}
+Every update function has an execution frequency of 83 Hz, which practically allows an information 
+refresh in real time.
+
+\subsubsection{Behaviors and Skills&Card}
+Behaviors represent the real actions the robot will take during the game. They are modeled as finite 
+automata, according to CABSL standard ($C$-$based$ $Agent$ $Behavior$ $Specification$ $Language$) \cite{}.
+This is based on the concepts of options, states, transitions and actions: the options are finite-state machines that
+describe a determined way of acting; transitions define the conditions to move between two states of the graph; 
+when the latter arrives in a state, the specified actions are executed.
+Actions are expressed as $Skills$, which are the leaves of the graph and the lowest abstraction elements.
+They make calls directly to the motion engine of the robot.
+
+Option idea matches with the concept of Card: each card represents one option, and it is the interpretation
+of an higher abstraction level for the actions. 
+To enter in a card, a robot has to satisfy its specified preconditions; to exit from a card, preconditions are not
+satisfied anymore or its postconditions are met instead.
+Cards are the fundamental elements that compose the Decks, which are literally ordered collections of cards.
+The order establishes the priority of the cards: the ones on the top have higher priority than the ones on the bottom.
+Starting from the first card, the agent enters in it if its preconditions are satisfied, otherwise he discards 
+the card and checks the second one, and so on. So it is very important to establish the right disposition,
+according to own puproses. 
+
+This hierarchy of the system allows to link the decks to the roles of the players in the field. 
+In this way it is possible to associate just the cards relative to the corresponding role, avoiding
+possible undesired behaviors. 
+
 
 \begin{figure}
     \centering
@@ -219,6 +249,44 @@ field.
 \subsubsection{Mental Modeling}
 
 \todo[inline]{Come rappresenta il mondo il robot? Stato del gioco e del campo fisico}
+Every robot has two different mental models, and they represent the way the robot 
+describes the world: a local world model and a global world model.
+The former is reconstructed starting just from the preceptions the robot itself has,
+so the generated mental model will be partial. Furthermore, the model is expressed 
+with respect to the robot itself.
+It contains:
+\begin{itemize}
+    \item relative positions of the perceived obstacles (also teammates and opponents)
+    \item relative positions of the perceived landmarks
+    \item relative position of the ball
+    \item relative velocity of the ball
+    \item time when ball was seen last time
+    \item self localization position in the field
+\end{itemize}
+
+The latter instead is reconstructed using the local world model and the information
+received from the teammates through the network. Because the local perceptions of the 
+single robot can be not so accurate, due to some additional noise that affects the sensors,
+some filters are applied to the single attributes that constitute the world model. This 
+is done to result in a more accurate probabilistic estimate of the values of those attributes.
+It is composed by:
+\begin{itemize}
+    \item global positions of the obstacles (teammates and opponents)
+    \item global positions of the landmarks
+    \item global position of the ball
+    \item global velocity of the ball
+    \item time when ball was seen last time from some teammates
+\end{itemize}
+
+Cohexistance of both the mental models is very important.
+The global one takes advantage of the intrinsic properties of a 
+distributed system, e.g. the capability to capture simultaneously different
+aspects and glimpses of the environment; this is very helpful to have a wider
+knowledge of the world, but it is affected by possible noisy informations coming 
+from robots that have not so precise informations.
+On the other hand, the local model is the key of the interaction between the robot and
+the environment, because it is a more accurate image of its surroundings.
+Indeed, it gives a smaller but deeper representation of the world.
 
 
 

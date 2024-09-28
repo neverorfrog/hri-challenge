@@ -278,8 +278,16 @@ possible undesired behaviors.
 \end{figure}
 
 \subsubsection{Memory}
-
 \todo[inline]{Boh}
+\suggestion{
+    The robot's perception is not limited to the current state of the environment; 
+    it also utilizes past information to inform its decisions. The robot maintains 
+    a memory of past events and when they occurred. For instance, it can remember the 
+    last time it saw the ball or when it last encountered an obstacle. This historical 
+    data is crucial for the human operator to accurately reconstruct the world model 
+    and make informed decisions. Additionally, the robot can recall the last command 
+    it received and resume it if necessary.
+}
 
 \subsubsection{Social Reasoning}
 

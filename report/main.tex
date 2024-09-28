@@ -35,6 +35,7 @@
 \newcommand\suggestion[1]{\textcolor{violet}{\textbf{Suggestion}: #1}}
 \newcommand\old[1]{\textcolor{brown}{\textbf{Old}: #1}}
 \newcommand\doubt[1]{\textcolor{purple}{#1 \textbf{(?)}}}
+\newcommand\code[1]{\textcolor{teal}{\texttt{#1}}}
 
 % \usepackage{physics}
 % \usepackage{adjustbox}
@@ -341,7 +342,7 @@ Indeed, it gives a smaller but deeper representation of the world.
 We opted for a solution that prioritizes high-level commands and audio-visual
 feedback. The graphical interface is made by a bunch of buttons, that allow the
 human operator to send commands to the robot, and a 2D representation of the
-field that shows the robot's position and its recosntruction of the world.  
+field that shows the robot's position and its reconstruction of the world.  
 
 \begin{figure}[H]
     \centering
@@ -420,7 +421,24 @@ data_format: "<d4sBBBB3ff2fHBB20B20f20f20fHH2B2B2f2f2f2f12B"
 \end{verbatim}
 
 This data packet contains all the information that is needed to have a graphical
-representation of the robot's mental model of the field. \todo[inline]{Spiegare un po'}
+representation of the robot's mental model of the field.
+
+The most important fields are:
+\begin{itemize}
+    \item \code{fallen}: a boolean that indicates if the robot is fallen,
+    \item \code{pos\_x, pos\_y, theta}: the position of the robot in the field,
+    \item \code{ball\_age}: the age of the ball that indicates how many cycles have passed since the robot saw the ball,
+    \item \code{ball\_pos\_x, ball\_pos\_y}: the position of the ball in the field,
+    \item \code{obstacle\_types}: an array that indicates the type of the obstacles in the field (e.g. teammate, opponent),
+    \item \code{obs\_center\_x, obs\_center\_y}: the position of the obstacles in the field,
+    \item \code{obs\_last\_seen}: the time when the obstacles were last seen,
+    \item \code{secs\_remaining}: the time remaining in the game,
+    \item \code{arm\_contact}: a boolean that indicates if the robot is in contact with an obstacle,
+    \item \code{arm\_push\_direction}: the direction in which the robot arm is pushed,
+    \item \code{arm\_time\_of\_last\_contact}: the time when the robot was last in contact with an obstacle,
+    \item \code{teamball, teamballvel}: the position and velocity of the ball in the field.
+\end{itemize}
+Using these informations, the human operator can have a detailed view of the field through the robot's perceptions.
 
 \subsection{Communication Layer}
 
@@ -588,8 +606,39 @@ reiterates over the command list.
 
 \section{Results}
 \label{sec:res}
+\subsection{Usability}  
+The system was tested exclusively by team members, and the feedback was positive 
+across various aspects:  
+\begin{itemize}  
+    \item \textbf{Reliability}: The system underwent extensive testing before the RoboCup 
+    SPL challenge and was used during the competition without any significant issues. 
+    Communication between the robot and the human operator remained stable, with the 
+    robot accurately executing commands and providing the expected feedback.  
+    \item \textbf{Validity}: The robot successfully interpreted the human operator's 
+    commands and executed them in real-time. Additionally, it provided the operator with a comprehensive view of the field through its sensors and offered feedback on the execution of commands.  
+    \item \textbf{Sensitivity}: The system is sensitive to network delays, which can 
+    impact the real-time interaction between the robot and the human operator.  
+\end{itemize}  
 
-\todo[inline]{Blocco 6 delle slide di iocchi}
+The graphical interface was designed to be user-friendly and intuitive, ensuring that 
+the human operator can interact with the robot quickly, which is essential in the 
+competitive RoboCup SPL challenge, where each match lasts only 3 minutes.  
+
+\subsection{Adversarial Environment - RoboCup 2024 SPL Challenge}  
+The system was tested in the highly competitive and adversarial setting of the RoboCup 
+2024 SPL challenge. Several factors in this environment could impact the system’s 
+performance, such as:  
+\begin{itemize}  
+    \item \textbf{Network Delays}: The system’s real-time interaction can be affected 
+    by network delays, posing challenges to command execution.  
+    \item \textbf{Game Rules}: The robot must be capable of interpreting and adhering 
+    to game rules in real-time.  
+    \item \textbf{Opponent's Strategy}: Opponents aim to exploit any weaknesses in the 
+    system, requiring the robot and the human-operator to adapt to their strategies dynamically.  
+\end{itemize}  
+Despite these challenges, the system performed effectively, and the team secured third 
+place in the competition.  
+
 
 \section{Experimental Evaluation} 
 

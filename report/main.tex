@@ -32,6 +32,9 @@
 % custom commands
 \newcommand\tab[1][.3cm]{\hspace*{#1}}
 \newcommand\tabeq[1][.5cm]{\hspace*{#1}}
+\newcommand\suggestion[1]{\textcolor{violet}{\textbf{Suggestion}: #1}}
+\newcommand\old[1]{\textcolor{brown}{\textbf{Old}: #1}}
+\newcommand\doubt[1]{\textcolor{purple}{#1 \textbf{(?)}}}
 
 % \usepackage{physics}
 % \usepackage{adjustbox}
@@ -50,65 +53,101 @@
 
 \section{Introduction}
 \label{sec:intro}
-
-In the context of RoboCup games, robots are fully autonomous. However, they
-surely could benefit from interaction with humans. For example, human soccer
-players benefit from receiving suggestions and sometimes even explicit
-instructions on what to do during the match. Similarly, an autonomous soccer
-robot could receive informed suggestions to enhance its planning
-\todo[inline]{Andrebbe detta meglio sta cosa}. In this project, we aim to make a
-small step in that direction by developing a system that allows a human operator
-to remotely control and interact with a Nao Humanoid through a graphical
-interface. 
+In the RoboCup games, robots are fully autonomous, yet there is potential for 
+improvement through human interaction. Just as human soccer players benefit from 
+receiving real-time suggestions or explicit instructions during a match, 
+autonomous soccer robots could also enhance their performance by incorporating 
+informed guidance. 
+\old{In this project, we aim to make a small step in that direction by developing a 
+system that allows a human operator to remotely control and interact with a Nao 
+Humanoid through a graphical interface.}
+\suggestion{In this project, we aim to take a step in this direction by developing a 
+system that enables a human operator to interact with a Nao humanoid robot via a graphical 
+interface and voice commands. The goal is to enhance the robot's performance and 
+provide real-time strategic suggestions, similar to the role of a football coach.}
 
 \subsection{Context and Motivation}
 \label{sec:context}
 
-Receiving instructions from a coach can be a game-changer in a soccer match. And
-also, receiving feedback from the robot when issuing a command drastically
-improves the interaction quality. This project was specifically designed to be
-used in the RoboCup 2024 SPL challenge, where two robots of one team had to
-compete against two robots of the opponent team, and one of the two robots for
-each team was controlled by a human operator. Furthermore, the rules of the
-challenge forced the human operator to turn his back to the field, in order to
-not directly observe the environment. This constrained us to make use of the
-directional robot-human communication also for the reconstruction of the world
-model.
+\subsubsection{RoboCup SPL Challenge}
+This project was specifically designed to be used in the RoboCup 2024 SPL challenge, 
+where two robots of one team had to compete against two robots of the opponent team, 
+and one of the two robots for each team was controlled by a human operator. Furthermore, 
+the rules of the challenge forced the human operator to turn his back to the field, 
+in order to not directly observe the environment. This constrained us to make use of the
+directional robot-human communication also for the reconstruction of the world model.
 
-\todo[inline]{Qua si puó dire di piú}
+\subsubsection{Possible Extensions}  
+The system developed in this project could be adapted to various other contexts. For instance, 
+it could be applied to the RoboCup SPL main competition, where a human operator for each team 
+might be allowed to provide real-time instructions to the robots via voice commands, using the 
+graphical interface to view the reconstructed world model of the entire team.  
 
+Another potential extension involves modifying the system to enable robots to play alongside human players. 
+In this scenario, the robot would need to interpret human commands and execute them in real-time, allowing 
+for mixed teams of humans and robots in a soccer game.
 
 \subsection{Objectives}
 \label{sec:obj}
 
-The main objective of the project is to develop a framework that allows the human operator
-to use the robot as a proxy to interact with the environment, namely the soccer
-field. To do this, a form of bidirectional interaction between the human operator 
-and the controlled robot is necessary. The human needs
-to be completely aware of the robot's surroundings, that is, the human can
-perceive the robot's surroundings only through the robot's sensors. The robot,
-on the other hand, has to be able to receive commands from the human operator
-and execute them in real-time. The robot should also be able to send feedback to
-the human operator in real-time. 
-\todo[inline]{Allungare un po' il brodo}
-\todo[inline]{Spingerei anche sul fatto che il tutto deve essere utilizzabile in un 
-ambiente competitivo}
+In the context of the RoboCup SPL challenge, the main objective of the project is to develop a framework
+that allows the human operator to use the robot as a \textit{proxy} to interact with the environment, namely the soccer
+field. 
+To do this, a form of bidirectional interaction between the human operator and the controlled robot is necessary. 
+
+\subsubsection{Bidirectional Communication}  
+Receiving instructions from a coach can significantly impact the outcome of a soccer match. 
+Likewise, getting feedback from the robot when issuing commands greatly enhances 
+the quality of the interaction. The human acting as a coach must be completely aware of the robot's surroundings,
+while the robot must be able to interpret the human's commands and respond accordingly. 
+\begin{itemize}  
+    \item \textbf{Robot-to-Human Communication}: The robot provides the human operator with 
+    all the necessary information to reconstruct the world model. These data are transmitted 
+    over the network to the operator's computer, where are filtered and displayed on the 
+    graphical interface. Moreover, the robot responds with vocal feedback to confirm received 
+    commands \doubt{or to report any issues (e.g. the impossibility to execute the command)}.  
+    \item \textbf{Human-to-Robot Communication}:  
+    \begin{itemize}  
+        \item \textbf{Coach-to-Robot Communication}: The human operator, acting as a coach, can 
+        analyze the reconstructed world model using the graphical interface and decide to send commands to the robot. 
+        These commands are transmitted through the network or via voice commands.  
+        \item \suggestion{\textbf{Referee-to-Robot Communication}: In the context of the RoboCup 
+        SPL challenge, another human, acting as a referee, can send commands to the robot using 
+        whistle signals. The robot must be capable of interpreting these signals and responding 
+        accordingly.}  
+    \end{itemize}  
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{assets/bidirectional-communication.png}
+    \label{fig:bidirectional-communication}
+    \caption{Bidirectional communication scheme}
+\end{figure}
+
+
+\subsubsection{Real-time Interaction}
+In the context of the RoboCup SPL challenge, the system must process commands in real-time, given the 
+competitive nature of the scenario. The robot needs to promptly interpret and execute the human operator's 
+commands while providing immediate feedback on the execution status. Any delay in processing could adversely 
+affect the robot's performance and the outcome of the match. Even in other applications, real-time interaction 
+is critical to maintain the robot's responsiveness to human input and ensure accurate reconstruction of the robot's world model.
 
 \subsection{Summary of the results}
 \label{sec:summary}
 
 Our system achieved the objective of allowing a human operator to control a Nao
 by voice and using a graphical interface, and to receive feedback from the robot
-in response to the commands. The system integrates various modules, such as:
+in response to the commands. The system integrates various features, such as:
 \begin{itemize}
-    \item \textbf{Communication}, which manages the communication between the robot and
+    \item \textbf{communication}: which manages the communication between the robot and
     the human operator
-    \item \textbf{Mental model}, responsible for representing the field by
+    \item \textbf{mental model}: responsible for representing the field by
     accessing only the robot's perceptions
-    \item \textbf{Interaction}, by answering to the commands before executing
-    them, considering also the feasibility of the execution itself
-    \item \textbf{Memory}, the past command is held in memory, in order to
-    resume it in case it is needed
+    \item \textbf{interaction}: by answering to the commands before executing
+    them, considering also the feasibility of the execution itself,
+    \item \textbf{memory}: the past command is held in memory, in order to
+    resume it in case it is needed.
 \end{itemize}
 The system was tested in the RoboCup 2024 SPL challenge, where SQPR Team reached
 the third place, demonstrating the effectiveness of the system in a competitive
@@ -156,7 +195,7 @@ like a coach in a soccer match.
 
 The system can be divided in two main parts: the framework backbone, written in
 C++, which runs on the robot itself, and the interface, written in Python and
-Nodejs, responsible for issuing commands to the robot and receiving feedback or
+Node.js, responsible for issuing commands to the robot and receiving feedback or
 sensory information. 
 
 \subsection{Framework backbone}
@@ -174,6 +213,13 @@ controlled by four threads:
 \end{itemize}
 Both camera threads capture images from the cameras of the robot, and work on them 
 to retrieve informations to describe the world.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{assets/threads.png}
+    \label{fig:threads}
+    \caption{Threads}
+\end{figure}
 
 \subsubsection{Representations and Modules}
 The two main components for the collection and storage of information from the environment

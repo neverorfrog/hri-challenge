@@ -361,6 +361,18 @@ Indeed, it gives a smaller but deeper representation of the world.
 però secondo me avrebbe senso metterci qualcosa, anche per far capire
 che le cose visualizzate nell'interfaccia si ottengono tramite questo}
 
+Python server is the bridge which links the robot and the graphical 
+interface. It is composed by two parallel processes in two opposite directions:
+\begin{itemize}
+    \item direction \textbf{robot-human}: server continuously listen in a specified port
+    messages from the agent about the world model; then it unpacks the information and send 
+    specific messages to the interface;
+    \item direction \textbf{human-robot}: server listens constantly messages that come from
+    the interface about the commands the human wants the robot execute, with any additional 
+    information; then the server wrap them in a precise struct, and send it to the robot. 
+     
+\end{itemize} 
+
 \subsection{Interface}
 
 We opted for a solution that prioritizes high-level commands and audio-visual
@@ -464,37 +476,16 @@ The most important fields are:
 \end{itemize}
 Using these informations, the human operator can have a detailed view of the field through the robot's perceptions.
 
-\subsection{Communication Layer}
+\subsection{Communication Layer / Python server}
 
 The communication layer is responsible for the exchange of messages between the
-robot and the human operator. It is written in Python and based on UDP sockets. 
+robot and the human operator, in both directions. 
+It is written in Python and based on UDP sockets. 
 
-\begin{verbatim}
-def send_command_to_cpp(self, command: int, strategy: int, x: int, y: int):
-    if command_number > self.config.command_offset:
-        command_body_number = Command.Null.value
-        command_head_number = command_number - self.config.command_offset
-    else:
-        command_body_number = command_number
-        command_head_number = Command.Null.value
-    encoded_data = struct.pack(
-        self.config.command_format,
-        command_body_number,
-        command_head_number,
-        strategy_number,
-        x_position,
-        y_position
-    )
-    try:
-        client_socket.sendto(encoded_data, (robot_ip, command_send_port))
-        print(f"Sending message to C++: {encoded_data}")
-    except Exception as e:
-        print(f"Error in send_message: {e}")
-\end{verbatim}
-
-This function sends a command that is received from the GUI to the robot. The
-receive function from nodejs is the following:
-
+\subsubsection{Human-to-Robot communication}
+The server listens to a port for a message from the graphical interface. Each unpacked message contains
+the command in the form of a string, with any additional useful information for the execution of the instructions.
+The receiving function from the GUI is the following:
 \begin{verbatim}
 def receive_command_from_js(self) -> tuple[int, int, int, int]:
     try:
@@ -523,9 +514,36 @@ def receive_command_from_js(self) -> tuple[int, int, int, int]:
         y_position = 0
     return command_number, strategy_number, x_position, y_position
 \end{verbatim}
-Basically, the python scripts receives a command in form of a string from the
-GUI, unpacks it, puts it into a serialized format and sends it to the robot.
 
+After the reception of the message, the whole instruction is wrapped in a serialized
+struct and it is sent to the robot. All this is done through the following function:
+
+
+\begin{verbatim}
+def send_command_to_cpp(self, command: int, strategy: int, x: int, y: int):
+    if command_number > self.config.command_offset:
+        command_body_number = Command.Null.value
+        command_head_number = command_number - self.config.command_offset
+    else:
+        command_body_number = command_number
+        command_head_number = Command.Null.value
+    encoded_data = struct.pack(
+        self.config.command_format,
+        command_body_number,
+        command_head_number,
+        strategy_number,
+        x_position,
+        y_position
+    )
+    try:
+        client_socket.sendto(encoded_data, (robot_ip, command_send_port))
+        print(f"Sending message to C++: {encoded_data}")
+    except Exception as e:
+        print(f"Error in send_message: {e}")
+\end{verbatim}
+
+\subsubsection{Robot-to-Human communication
+\todo[inline]{to complete}}
 
 \subsection{Framework}
 

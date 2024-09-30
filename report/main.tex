@@ -90,7 +90,7 @@ for mixed teams of humans and robots in a soccer game.
 
 \subsection{Objectives}
 \label{sec:obj}
-
+\todo[inline]{Ci sono troppe ripetizioni di questa frase, alcune vanno tolte}
 In the context of the RoboCup SPL challenge, the main objective of the project is to develop a framework
 that allows the human operator to use the robot as a \textit{proxy} to interact with the environment, namely the soccer
 field. 
@@ -198,10 +198,23 @@ The system can be divided in two main parts: the framework backbone, written in
 C++, which runs on the robot itself, and the interface, written in Python and
 Node.js, responsible for issuing commands to the robot and receiving feedback or
 sensory information. 
+\\
+
+\suggestion{WRITE IN THIS OTHER WAY}\\
+The system can be divided in three parts: 
+    \begin{itemize}
+        \item framework backbone, written in C++, which runs on the robot itself;
+        \item interface in Node.js, where the reconstructed world
+        model is displayed and the commands to control the robot are available; 
+        \item Python server, which allows the comunication between the robot 
+        and the interface, i.e. it is responsible for issuing commands to the robot 
+        and receiving feedback or sensory information. 
+    \end{itemize}
 
 \subsection{Framework backbone}
-The framework on which everything stands on is derived from that one of the
-German team B-Human \cite{bhuman2023}, University of Bremen. At low level, the robot is 
+The framework on which everything stands on is the one of the SQPR team of Sapienza University \cite{},
+which is derived from that one of the
+German team B-Human of the year 2021 \cite{bhuman2023}, University of Bremen. At low level, the robot is 
 controlled by four threads:
 \begin{itemize}
     \item Upper camera thread: it deals with upper camera of the robot, positioned on its forehead;
@@ -343,7 +356,10 @@ On the other hand, the local model is the key of the interaction between the rob
 the environment, because it is a more accurate image of its surroundings.
 Indeed, it gives a smaller but deeper representation of the world.
 
-
+\subsection{Python server}
+\todo[inline]{questa in realtà è la roba che sta in implementation,
+però secondo me avrebbe senso metterci qualcosa, anche per far capire
+che le cose visualizzate nell'interfaccia si ottengono tramite questo}
 
 \subsection{Interface}
 

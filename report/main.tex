@@ -150,7 +150,7 @@ in response to the commands. The system integrates various features, such as:
     \item \textbf{memory}: the past command is held in memory, in order to
     resume it in case it is needed.
 \end{itemize}
-The system was tested in the RoboCup 2024 SPL challenge, where SQPR Team reached
+The system was tested in the RoboCup 2024 SPL challenge, where SPQR Team reached
 the third place, demonstrating the effectiveness of the system in a competitive
 environment.
 
@@ -212,7 +212,8 @@ The system can be divided in three parts:
     \end{itemize}
 
 \subsection{Framework backbone}
-The framework on which everything stands on is the one of the SQPR team of Sapienza University \cite{},
+\label{sec:framework}
+The framework on which everything stands on is the one of the SPQR team of Sapienza University \cite{},
 which is derived from that one of the
 German team B-Human of the year 2021 \cite{bhuman2023}, University of Bremen. At low level, the robot is 
 controlled by four threads:
@@ -622,9 +623,20 @@ local mental model (see section \ref{subsec:mental_model}). It is done through t
 
 
 \subsection{Framework}
+\todo[inline]{to finish}
+As it was previously said, the SPQR-Team framework is the backbone of the project and its
+operational mechanism was explained in the section \ref{sec:framework}.
+The two mental models are already available in the framework, which allow the robot to
+maintain a representation of the world where he plays, \suggestion{permitting him to act according to
+his needs, and helping us to give the right instructions to him.} 
 
-The framework is the backbone of the system. The two main functions are the
-update of the CommandReceiver and the update of the DebugMessageHandler (which
+What we added inside the framework (to make it work with the rest of the infrastructure) 
+regard two aspects of the robot: the communication with the interface to send information
+and receive human commands, and the behaviors the robot must have during the games, according
+to own believes about the environment and to received human instructions.
+
+\subsubsection{CommandReceiver and DebugMessageHandler}
+The two main functions are the update of the CommandReceiver and the update of the DebugMessageHandler (which
 sends sensory information). The CommandReceiver is responsible for updating the
 representation HumanCommand, while giving some audio feedback to the human about
 the received command. In the following function, the command is parsed,
@@ -675,6 +687,8 @@ void CommandReceiver::update(HumanCommand& command) {
 }
 \end{verbatim}
 
+
+\subsubsection{Designed behavior}
 Once the command is stored in the HumanCommand representation, it is used by the
 specific behavior we designed for the interacting robot. The update function
 iterates over the possible commands (defined as an enumeration) in the start

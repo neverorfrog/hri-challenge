@@ -315,7 +315,7 @@ for the robot to have a sufficiently detailed model of the game state and the
 field.
 
 \subsubsection{Mental Modeling}
-
+\label{subsec:mental_model}
 \todo[inline]{Come rappresenta il mondo il robot? Stato del gioco e del campo fisico}
 Every robot has two different mental models, and they represent the way the robot 
 describes the world: a local world model and a global world model.
@@ -428,6 +428,7 @@ The \textit{DebugInfo} struct, on the other hand, is used to send feedback from
 the robot to the human operator. It has the following structure:
 
 \begin{verbatim}
+    \label{debug}
 1)      4B header
 2)      1B version
 3)      1B player_num
@@ -495,7 +496,8 @@ def receive_command_from_js(self) -> tuple[int, int, int, int]:
     try:
         message = data.decode()
     except UnicodeDecodeError:
-        print(f"Received non-UTF-8 message from JavaScript: {data} from {addr}")
+        print(f"Received non-UTF-8 message from \
+        JavaScript: {data} from {addr}")
     message_split = message.split('|')[1]
     content_message = message_split.split(',')
     task_type = content_message[2]
@@ -542,8 +544,82 @@ def send_command_to_cpp(self, command: int, strategy: int, x: int, y: int):
         print(f"Error in send_message: {e}")
 \end{verbatim}
 
-\subsubsection{Robot-to-Human communication
-\todo[inline]{to complete}}
+\subsubsection{Robot-to-Human communication}
+\todo[inline]{to check}
+This thread makes the server listening to a different port for messages from the 
+robot. As explained before, these messages contain world modeling data in
+a packed way, and encorporate a lot of infos expressed above in the $DebugInfo$ struct.
+The function that is responsible for receiving messages from the robot is the following:
+\begin{verbatim}
+    def receive_from_cpp(self) -> struct:
+        debug_packet = None
+        try:    
+            data, _ = self.server_socket.recvfrom(1024)
+        except Exception as e:
+            print(f"Error in receiving the message: {e}")
+        if len(data) == struct.calcsize(self.config.data_format):
+            debug_packet = struct.unpack(self.config.data_format, data)
+        else:
+            print(f"Received unexpected data from C++: {data}")
+        return debug_packet
+\end{verbatim}
+
+Then the server has to unwrap the debug packet and it is going to select just some of these information
+to send to the graphcal interface. In particular, it will communicate the infos about the 
+local mental model (see section \ref{subsec:mental_model}). It is done through these functions:
+
+\begin{verbatim}
+    def send_robot_pose(self, pos_x, pos_y, plot_id: int) -> None:
+        robot_pose = f"{plot_id},{0.},{pos_x},{pos_y}"
+        robot_pose_message = f"|robotPos:{robot_pose}"
+        self.client_socket.sendto(robot_pose_message.encode(), \
+            (self.config.local_ip, self.config.debug_send_port))
+        
+    def send_ball_info(self, debug_packet) -> None:
+        ballpos_x = debug_packet[DataEntryIndex.BallPosX.value]
+        ballpos_y = debug_packet[DataEntryIndex.BallPosY.value]
+        ball_position = f"{ballpos_x:.2f},{ballpos_y:.2f}"
+        ball_position_message = f"|ballPos:{ball_position}"
+        self.client_socket.sendto(ball_position_message.encode(), \ 
+            (self.config.local_ip, self.config.debug_send_port))
+        
+    def send_game_info(self, debug_packet) -> None:
+        time_left = debug_packet[DataEntryIndex.SecsRemaining.value]
+        time_left_message = f"|timeLeft:{time_left}"
+        self.client_socket.sendto(time_left_message.encode(), \
+            (self.config.local_ip, self.config.debug_send_port))
+
+    def send_autonomous_role(self, debug_packet) -> None:
+        current_me = self.debuginfo.controlled_robot.get_current()
+        controlled_robot_pos_x = current_me[0]
+        controlled_robot_pos_y = current_me[1]
+
+        current_teammates = self.debuginfo.teammates.get_current()
+        autonomous_robot_pos_x = current_teammates[0]
+        autonomous_robot_pos_y = current_teammates[1]
+
+        ball_pos_x = debug_packet[DataEntryIndex.BallPosX.value]
+        ball_pos_y = debug_packet[DataEntryIndex.BallPosY.value]
+
+        controlled_ball_distance = np.sqrt( \
+            (controlled_robot_pos_x - ball_pos_x)**2 + \
+            (controlled_robot_pos_y - ball_pos_y)**2)
+        autonomous_ball_distance = np.sqrt( \
+            (autonomous_robot_pos_x - ball_pos_x)**2 + \
+            (autonomous_robot_pos_y - ball_pos_y)**2)
+
+        autonomous_striker = \
+            autonomous_ball_distance < controlled_ball_distance
+
+        autonomous_info = f"|autonomousRole:{autonomous_striker}"
+        self.client_socket.sendto(autonomous_info.encode(), \
+            (self.config.local_ip, self.config.debug_send_port))
+\end{verbatim}
+
+
+
+
+
 
 \subsection{Framework}
 

@@ -375,7 +375,7 @@ interface. It is composed by two parallel processes in two opposite directions:
 \end{itemize} 
 
 \subsection{Interface}
-
+\label{subsec:interface}
 We opted for a solution that prioritizes high-level commands and audio-visual
 feedback. The graphical interface is made by a bunch of buttons, that allow the
 human operator to send commands to the robot, and a 2D representation of the
@@ -429,7 +429,6 @@ The \textit{DebugInfo} struct, on the other hand, is used to send feedback from
 the robot to the human operator. It has the following structure:
 
 \begin{verbatim}
-    \label{debug}
 1)      4B header
 2)      1B version
 3)      1B player_num
@@ -636,11 +635,12 @@ and receive human commands, and the behaviors the robot must have during the gam
 to own believes about the environment and to received human instructions.
 
 \subsubsection{CommandReceiver and DebugMessageHandler}
-The two main functions are the update of the CommandReceiver and the update of the DebugMessageHandler (which
-sends sensory information). The CommandReceiver is responsible for updating the
-representation HumanCommand, while giving some audio feedback to the human about
-the received command. In the following function, the command is parsed,
-converted to enums and stored in the HumanCommand representation. 
+The two main functions are the update of the CommandReceiver and the update of the DebugMessageHandler 
+(which sends sensory information). The \textit{CommandReceiver} is responsible for updating the
+representation \textit{HumanCommand} with the received command and additional parameters, 
+while giving some audio feedback to the human about it. 
+In the following function, the command is parsed,
+converted to enums and stored in the provided representation. 
 
 \begin{verbatim}
 void CommandReceiver::update(HumanCommand& command) {
@@ -687,13 +687,92 @@ void CommandReceiver::update(HumanCommand& command) {
 }
 \end{verbatim}
 
+The \textit{DebugMessageHandler} is responsible to update \dots
+\todo[inline]{to complete, non so che scrivere}
+
 
 \subsubsection{Designed behavior}
-Once the command is stored in the HumanCommand representation, it is used by the
-specific behavior we designed for the interacting robot. The update function
-iterates over the possible commands (defined as an enumeration) in the start
-state with a switch, executing the corresponding skill for each command. For
-instance:
+Once the command is received and the \textit{HumanCommand} representation is updated,
+it is used by the specific behavior we designed for the interacting robot.
+We created a \textit{BaseControlledCard} to convert the information inside the
+representation in effective actions to execute. Due to the syntax of the CABSL standard
+and to our necessities, we implemented the card to manage more clearly the body actions,
+while implementing an auxiliar function (named \textit{switchHeadCommands}) to handle concurrently the head actions.
+The body instructions are guided by a switch command, which directs the agent to the 
+right state of the state-machine.
+Here we show the root of the graph, whence all states branch off:
+
+\begin{verbatim}
+    initial_state(start)
+    {
+      transition
+      {
+        switch (theHumanCommand.commandBody)
+        { 
+        case HumanCommand::CommandBody::GoToPosition:
+          goto goToPosition;
+          break;
+        case HumanCommand::CommandBody::Dribble:
+          goto dribble;
+          break;
+        case HumanCommand::CommandBody::GoToBallAndDribble:
+          goto goToBallAndDribble;
+          break;
+        case HumanCommand::CommandBody::Kick:
+          goto kick;
+          break;
+        case HumanCommand::CommandBody::Spazza:
+          goto spazza;
+          break;
+        case HumanCommand::CommandBody::Pass:
+          goto pass;
+          break;
+        case HumanCommand::CommandBody::AskForTheBall:
+          goto askForTheBall;
+          break;
+        case HumanCommand::CommandBody::Turn:
+          goto turn;
+          break;
+        case HumanCommand::CommandBody::SearchTheBall:
+          goto turn;
+          break;
+        case HumanCommand::CommandBody::Stop:
+          goto stop;
+          break;
+        default:
+          break;
+        }
+      }
+    }
+   
+\end{verbatim}
+
+It is possible to notice how each of these states correspond to a button in the interface,
+as shown in the figure \ref{fig:interface}.
+As explained in the section \ref{subsec:interface}, some of these states refer to lower 
+level actions, which require the explicitation of the additional parameters by the human.
+An example is the state \textit{goToPosition}:
+
+\begin{verbatim}
+    state(goToPosition)
+    {
+      transition
+      {
+        if (theHumanCommand.commandBody != HumanCommand::CommandBody::GoToPosition)
+          goto start;
+      }
+      action
+      {
+        Pose2f pose = theLibMisc.glob2Rel(theHumanCommand.x, theHumanCommand.y);
+        theWalkToPointSkill(pose);
+        switchHeadCommands();
+      }
+    }
+
+\end{verbatim}
+
+which needs the field coordinates saved in the representation and given by the operator (coach?).
+On the contrary, other actions must be interpreted just as \suggestion{ADVICE} by the 
 
 \begin{verbatim}
 state(pass)
@@ -727,6 +806,7 @@ state(pass)
 
 Whenever a new command is received, the robot answers with an audio feedback and
 reiterates over the command list. 
+
 
 
 \subsection{Speech-to-Text Module}

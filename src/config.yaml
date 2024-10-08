@@ -12,6 +12,7 @@ lower_image_receive_port: 5431
 
 command_send_port: 65306
 command_receive_port: 65300
+speech_port: 65304
 
 # Command Offset
 command_offset: 10

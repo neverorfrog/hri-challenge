@@ -6,6 +6,7 @@ import subprocess
 
 from communication.utils import SocketThread, load_config, DebugInfo
 from communication.threads import CommandSender, DebugInfoReceiver, CameraImageReceiver
+from communication.threads.speechtest2 import SpeechSender
 
 def run_node_script():
     try:
@@ -37,11 +38,12 @@ def main():
     debuginfo = DebugInfo()
     
     command_sender = CommandSender(config)
+    speech_sender = SpeechSender(config)
     debug_info_receiver = DebugInfoReceiver(config, debuginfo)
     # upper_image_receiver = CameraImageReceiver(config, "upper")
     # lower_image_receiver = CameraImageReceiver(config, "lower")
     node_thread = threading.Thread(target=run_node_script)
-    threads: List[threading.Thread] = [debug_info_receiver, command_sender, node_thread]
+    threads: List[threading.Thread] = [debug_info_receiver, command_sender, node_thread, speech_sender]
     
     for thread in threads:
         thread.start()

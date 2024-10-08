@@ -1,6 +1,6 @@
 import socket
 import struct
-
+import select
 from communication.utils import Command, SocketThread
 
 class CommandSender(SocketThread):
@@ -8,6 +8,9 @@ class CommandSender(SocketThread):
         super().__init__(config)
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._server_socket.bind((config.local_ip, config.command_receive_port))
+        # self.speech_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # self.speech_server_socket.bind((config.local_ip, config.speech_port))
+        
         self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def update(self):
@@ -21,18 +24,31 @@ class CommandSender(SocketThread):
             Exception: If there is an error while receiving the message.
 
         """
+        # CODE TO MANAGE MESSAGES ON TWO DIFFERENT PORTS
+        # sockets_to_monitor = [self._server_socket, self.speech_server_socket]
+        # while not self.stop_threads.is_set():
+        #     print("OK")
+        #     readable, _, _ = select.select(sockets_to_monitor, [], [])
+        #     for sock in readable:
+        #         # self.receive_command()
+        #         command_number, strategy_number, x_position, y_position = self.receive_command()
+        #         self.send_command_to_cpp(command_number, strategy_number, x_position, y_position)
+        
+        # CODE TO MANAGE MESSAGES ON THE SAME PORT
         while not self.stop_threads.is_set():
-            command_number, strategy_number, x_position, y_position = self.receive_command_from_js()
+            print("OK")
+            command_number, strategy_number, x_position, y_position = self.receive_command()
             self.send_command_to_cpp(command_number, strategy_number, x_position, y_position)
     
-    
-    def receive_command_from_js(self) -> tuple[int, int, int, int]:
+    # Receive command from JavaScript or from Speech recognition thread
+    def receive_command(self) -> tuple[int, int, int, int]:
         try:
             data, addr = self.server_socket.recvfrom(1024)
         except Exception as e:
             print(f"Error in receiving the message: {e}")
         try:
             message = data.decode()
+            print("message:     ", message)
         except UnicodeDecodeError:
             print(f"Received non-UTF-8 message from JavaScript: {data} from {addr}")
         message_split = message.split('|')[1]

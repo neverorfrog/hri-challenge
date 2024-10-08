@@ -5,7 +5,9 @@ import vosk
 import json
 
 # Audio recording parameters
-RATE = 16000
+device_info = sd.query_devices(kind='input')
+sample_rate = device_info['default_samplerate']
+RATE = sample_rate
 CHUNK = int(RATE / 10)  # 100ms
 
 class MicrophoneStream(object):

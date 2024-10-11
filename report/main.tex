@@ -771,8 +771,33 @@ An example is the state \textit{goToPosition}:
 
 \end{verbatim}
 
-which needs the field coordinates saved in the representation and given by the operator (coach?).
-On the contrary, other actions must be interpreted just as \suggestion{ADVICE} by the 
+which needs the field coordinates given by the operator (coach?) saved in the representation.
+On the contrary, other actions must be interpreted just as \suggestion{ADVICE} coming 
+from the coach. Here the agent has a certain degree of freedom, and must use 
+its knowledge to complete the action. An example is the state \textit{goToBallAndDribble}:
+
+\begin{verbatim}
+    state(goToBallAndDribble)
+    {
+      transition
+      {
+        if (theHumanCommand.commandBody != HumanCommand::CommandBody::GoToBallAndDribble)
+          goto start;
+      }
+
+      action
+      {
+        theGoToBallAndDribbleSkill(calcAngleToTarget(theLibStriker.strikerMovementPoint()));
+      }
+    }
+\end{verbatim}
+The called skill compute a free point in the field toward which the dribble must be executed,  
+brings the robot near the ball and complete the dribble.
+A special mention goes to the state \textit{pass}, which falls in the latter category of states.
+This one tells to the agent to execute a passage to its teammate in the field, thus the robot
+must have the position of the teammate in one of its mental model. 
+At the time when the robot has no teammate, an uncertain situation appears.
+We managed this circumstance redirecting to another action, applying a dribble instead of a passage.
 
 \begin{verbatim}
 state(pass)
@@ -804,8 +829,6 @@ state(pass)
 }
 \end{verbatim}
 
-Whenever a new command is received, the robot answers with an audio feedback and
-reiterates over the command list. 
 
 
 

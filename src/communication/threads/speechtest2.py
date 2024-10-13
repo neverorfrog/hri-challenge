@@ -92,12 +92,11 @@ class SpeechSender(SocketThread):
                             command = "Spazza"
                         case "pass":
                             command = "Pass"
-                        case "ask for ball":
-                            command = "AskForBall"
-                        case "turn":
-                            command = "Turn"
-                        case "search for ball":
-                            command = "SearchForBall"
+                        case "ask":
+                            command = "AskForTheBall"
+                        
+                        case "score":
+                            command = "SearchTheBall"
                         case "stop":
                             command = "Stop"
                         case "look at the ball":

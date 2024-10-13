@@ -147,7 +147,7 @@ in response to the commands. The system integrates various features, such as:
     \item \textbf{memory}: the past command is held in memory, in order to
     resume it in case it is needed.
 \end{itemize}
-The system was tested in the RoboCup 2024 SPL challenge, where SQPR Team reached
+The system was tested in the RoboCup 2024 SPL challenge, where SPQR Team reached
 the third place, demonstrating the effectiveness of the system in a competitive
 environment.
 
@@ -191,14 +191,21 @@ like a coach in a soccer match.
 \section{Solution}
 \label{sec:sol}
 
-The system can be divided in two main parts: the framework backbone, written in
-C++, which runs on the robot itself, and the interface, written in Python and
-Node.js, responsible for issuing commands to the robot and receiving feedback or
-sensory information. 
+The system can be divided in three parts: 
+    \begin{itemize}
+        \item framework backbone, written in C++, which runs on the robot itself;
+        \item interface in Node.js, where the reconstructed world
+        model is displayed and the commands to control the robot are available; 
+        \item Python server, which allows the comunication between the robot 
+        and the interface, i.e. it is responsible for issuing commands to the robot 
+        and receiving feedback or sensory information. 
+    \end{itemize}
 
 \subsection{Framework backbone}
-The framework on which everything stands on is derived from that one of the
-German team B-Human \cite{bhuman2023}, University of Bremen. At low level, the robot is 
+\label{sec:framework}
+The framework on which everything stands on is the one of the SPQR team of Sapienza University \cite{},
+which is derived from that one of the
+German team B-Human of the year 2021 \cite{bhuman2023}, University of Bremen. At low level, the robot is 
 controlled by four threads:
 \begin{itemize}
     \item \textbf{Upper camera thread}: it deals with upper camera of the robot, positioned on its forehead;
@@ -299,7 +306,7 @@ for the robot to have a sufficiently detailed model of the game state and the
 field.
 
 \subsubsection{Mental Modeling}
-
+\label{subsec:mental_model}
 \todo[inline]{Come rappresenta il mondo il robot? Stato del gioco e del campo fisico}
 Every robot has two different mental models, and they represent the way the robot 
 describes the world: a local world model and a global world model.
@@ -340,10 +347,25 @@ On the other hand, the local model is the key of the interaction between the rob
 the environment, because it is a more accurate image of its surroundings.
 Indeed, it gives a smaller but deeper representation of the world.
 
+\subsection{Python server}
+\todo[inline]{questa in realtà è la roba che sta in implementation,
+però secondo me avrebbe senso metterci qualcosa, anche per far capire
+che le cose visualizzate nell'interfaccia si ottengono tramite questo}
 
+Python server is the bridge which links the robot and the graphical 
+interface. It is composed by two parallel processes in two opposite directions:
+\begin{itemize}
+    \item direction \textbf{robot-human}: server continuously listen in a specified port
+    messages from the agent about the world model; then it unpacks the information and send 
+    specific messages to the interface;
+    \item direction \textbf{human-robot}: server listens constantly messages that come from
+    the interface about the commands the human wants the robot execute, with any additional 
+    information; then the server wrap them in a precise struct, and send it to the robot. 
+     
+\end{itemize} 
 
 \subsection{Interface}
-
+\label{subsec:interface}
 We opted for a solution that prioritizes high-level commands and audio-visual
 feedback. The graphical interface is made by a bunch of buttons, that allow the
 human operator to send commands to the robot, and a 2D representation of the
@@ -448,7 +470,47 @@ Using these informations, the human operator can have a detailed view of the fie
 \subsection{Communication Layer}
 
 The communication layer is responsible for the exchange of messages between the
-robot and the human operator. It is written in Python and based on UDP sockets. 
+robot and the human operator, in both directions. 
+It is written in Python and based on UDP sockets. 
+
+\subsubsection{Human-to-Robot communication}
+The server listens to a port for a message from the graphical interface. Each unpacked message contains
+the command in the form of a string, with any additional useful information for the execution of the instructions.
+The receiving function from the GUI is the following:
+\todo[inline]{cambia codice di receive}
+\begin{verbatim}
+def receive_command_from_js(self) -> tuple[int, int, int, int]:
+    try:
+        data, addr = self.server_socket.recvfrom(1024)
+    except Exception as e:
+        print(f"Error in receiving the message: {e}")
+    try:
+        message = data.decode()
+    except UnicodeDecodeError:
+        print(f"Received non-UTF-8 message from \
+        JavaScript: {data} from {addr}")
+    message_split = message.split('|')[1]
+    content_message = message_split.split(',')
+    task_type = content_message[2]
+    command_number = Command[task_type].value
+    strategy_number = int(content_message[5])
+    task_label = content_message[4]
+    selection = content_message[1]
+    print(f"Task Label: {task_label}")
+    if selection == "selection":
+        x_position = int(content_message[6])
+        y_position = int(content_message[7])
+        print(f"X Position: {x_position}")
+        print(f"Y Position: {y_position}")
+    else:
+        x_position = 0
+        y_position = 0
+    return command_number, strategy_number, x_position, y_position
+\end{verbatim}
+
+After the reception of the message, the whole instruction is wrapped in a serialized
+struct and it is sent to the robot. All this is done through the following function:
+
 
 \begin{verbatim}
 def send_command_to_cpp(self, command: int, strategy: int, x: int, y: int):
@@ -473,49 +535,103 @@ def send_command_to_cpp(self, command: int, strategy: int, x: int, y: int):
         print(f"Error in send_message: {e}")
 \end{verbatim}
 
-This function sends a command that is received from the GUI to the robot. The
-receive function from nodejs is the following:
+\subsubsection{Robot-to-Human communication}
+\todo[inline]{to check}
+This thread makes the server listening to a different port for messages from the 
+robot. As explained before, these messages contain world modeling data in
+a packed way, and encorporate a lot of infos expressed above in the $DebugInfo$ struct.
+The function that is responsible for receiving messages from the robot is the following:
+\begin{verbatim}
+    def receive_from_cpp(self) -> struct:
+        debug_packet = None
+        try:    
+            data, _ = self.server_socket.recvfrom(1024)
+        except Exception as e:
+            print(f"Error in receiving the message: {e}")
+        if len(data) == struct.calcsize(self.config.data_format):
+            debug_packet = struct.unpack(self.config.data_format, data)
+        else:
+            print(f"Received unexpected data from C++: {data}")
+        return debug_packet
+\end{verbatim}
+
+Then the server has to unwrap the debug packet and it is going to select just some of these information
+to send to the graphcal interface. In particular, it will communicate the infos about the 
+local mental model (see section \ref{subsec:mental_model}). It is done through these functions:
 
 \begin{verbatim}
-def receive_command_from_js(self) -> tuple[int, int, int, int]:
-    try:
-        data, addr = self.server_socket.recvfrom(1024)
-    except Exception as e:
-        print(f"Error in receiving the message: {e}")
-    try:
-        message = data.decode()
-    except UnicodeDecodeError:
-        print(f"Received non-UTF-8 message from JavaScript: {data} from {addr}")
-    message_split = message.split('|')[1]
-    content_message = message_split.split(',')
-    task_type = content_message[2]
-    command_number = Command[task_type].value
-    strategy_number = int(content_message[5])
-    task_label = content_message[4]
-    selection = content_message[1]
-    print(f"Task Label: {task_label}")
-    if selection == "selection":
-        x_position = int(content_message[6])
-        y_position = int(content_message[7])
-        print(f"X Position: {x_position}")
-        print(f"Y Position: {y_position}")
-    else:
-        x_position = 0
-        y_position = 0
-    return command_number, strategy_number, x_position, y_position
+    def send_robot_pose(self, pos_x, pos_y, plot_id: int) -> None:
+        robot_pose = f"{plot_id},{0.},{pos_x},{pos_y}"
+        robot_pose_message = f"|robotPos:{robot_pose}"
+        self.client_socket.sendto(robot_pose_message.encode(), \
+            (self.config.local_ip, self.config.debug_send_port))
+        
+    def send_ball_info(self, debug_packet) -> None:
+        ballpos_x = debug_packet[DataEntryIndex.BallPosX.value]
+        ballpos_y = debug_packet[DataEntryIndex.BallPosY.value]
+        ball_position = f"{ballpos_x:.2f},{ballpos_y:.2f}"
+        ball_position_message = f"|ballPos:{ball_position}"
+        self.client_socket.sendto(ball_position_message.encode(), \ 
+            (self.config.local_ip, self.config.debug_send_port))
+        
+    def send_game_info(self, debug_packet) -> None:
+        time_left = debug_packet[DataEntryIndex.SecsRemaining.value]
+        time_left_message = f"|timeLeft:{time_left}"
+        self.client_socket.sendto(time_left_message.encode(), \
+            (self.config.local_ip, self.config.debug_send_port))
+
+    def send_autonomous_role(self, debug_packet) -> None:
+        current_me = self.debuginfo.controlled_robot.get_current()
+        controlled_robot_pos_x = current_me[0]
+        controlled_robot_pos_y = current_me[1]
+
+        current_teammates = self.debuginfo.teammates.get_current()
+        autonomous_robot_pos_x = current_teammates[0]
+        autonomous_robot_pos_y = current_teammates[1]
+
+        ball_pos_x = debug_packet[DataEntryIndex.BallPosX.value]
+        ball_pos_y = debug_packet[DataEntryIndex.BallPosY.value]
+
+        controlled_ball_distance = np.sqrt( \
+            (controlled_robot_pos_x - ball_pos_x)**2 + \
+            (controlled_robot_pos_y - ball_pos_y)**2)
+        autonomous_ball_distance = np.sqrt( \
+            (autonomous_robot_pos_x - ball_pos_x)**2 + \
+            (autonomous_robot_pos_y - ball_pos_y)**2)
+
+        autonomous_striker = \
+            autonomous_ball_distance < controlled_ball_distance
+
+        autonomous_info = f"|autonomousRole:{autonomous_striker}"
+        self.client_socket.sendto(autonomous_info.encode(), \
+            (self.config.local_ip, self.config.debug_send_port))
 \end{verbatim}
-Basically, the python scripts receives a command in form of a string from the
-GUI, unpacks it, puts it into a serialized format and sends it to the robot.
+
+
+
+
 
 
 \subsection{Framework}
+\todo[inline]{to finish}
+As it was previously said, the SPQR-Team framework is the backbone of the project and its
+operational mechanism was explained in the section \ref{sec:framework}.
+The two mental models are already available in the framework, which allow the robot to
+maintain a representation of the world where he plays, \suggestion{permitting him to act according to
+his needs, and helping us to give the right instructions to him.} 
 
-The framework is the backbone of the system. The two main functions are the
-update of the CommandReceiver and the update of the DebugMessageHandler (which
-sends sensory information). The CommandReceiver is responsible for updating the
-representation HumanCommand, while giving some audio feedback to the human about
-the received command. In the following function, the command is parsed,
-converted to enums and stored in the HumanCommand representation. 
+What we added inside the framework (to make it work with the rest of the infrastructure) 
+regard two aspects of the robot: the communication with the interface to send information
+and receive human commands, and the behaviors the robot must have during the games, according
+to own believes about the environment and to received human instructions.
+
+\subsubsection{CommandReceiver and DebugMessageHandler}
+The two main functions are the update of the CommandReceiver and the update of the DebugMessageHandler 
+(which sends sensory information). The \textit{CommandReceiver} is responsible for updating the
+representation \textit{HumanCommand} with the received command and additional parameters, 
+while giving some audio feedback to the human about it. 
+In the following function, the command is parsed,
+converted to enums and stored in the provided representation. 
 
 \begin{verbatim}
 void CommandReceiver::update(HumanCommand& command) {
@@ -562,11 +678,117 @@ void CommandReceiver::update(HumanCommand& command) {
 }
 \end{verbatim}
 
-Once the command is stored in the HumanCommand representation, it is used by the
-specific behavior we designed for the interacting robot. The update function
-iterates over the possible commands (defined as an enumeration) in the start
-state with a switch, executing the corresponding skill for each command. For
-instance:
+The \textit{DebugMessageHandler} is responsible to update \dots
+\todo[inline]{to complete, non so che scrivere}
+
+
+\subsubsection{Designed behavior}
+Once the command is received and the \textit{HumanCommand} representation is updated,
+it is used by the specific behavior we designed for the interacting robot.
+We created a \textit{BaseControlledCard} to convert the information inside the
+representation in effective actions to execute. Due to the syntax of the CABSL standard
+and to our necessities, we implemented the card to manage more clearly the body actions,
+while implementing an auxiliar function (named \textit{switchHeadCommands}) to handle concurrently the head actions.
+The body instructions are guided by a switch command, which directs the agent to the 
+right state of the state-machine.
+Here we show the root of the graph, whence all states branch off:
+
+\begin{verbatim}
+    initial_state(start)
+    {
+      transition
+      {
+        switch (theHumanCommand.commandBody)
+        { 
+        case HumanCommand::CommandBody::GoToPosition:
+          goto goToPosition;
+          break;
+        case HumanCommand::CommandBody::Dribble:
+          goto dribble;
+          break;
+        case HumanCommand::CommandBody::GoToBallAndDribble:
+          goto goToBallAndDribble;
+          break;
+        case HumanCommand::CommandBody::Kick:
+          goto kick;
+          break;
+        case HumanCommand::CommandBody::Spazza:
+          goto spazza;
+          break;
+        case HumanCommand::CommandBody::Pass:
+          goto pass;
+          break;
+        case HumanCommand::CommandBody::AskForTheBall:
+          goto askForTheBall;
+          break;
+        case HumanCommand::CommandBody::Turn:
+          goto turn;
+          break;
+        case HumanCommand::CommandBody::SearchTheBall:
+          goto turn;
+          break;
+        case HumanCommand::CommandBody::Stop:
+          goto stop;
+          break;
+        default:
+          break;
+        }
+      }
+    }
+   
+\end{verbatim}
+
+It is possible to notice how each of these states correspond to a button in the interface,
+as shown in the figure \ref{fig:interface}.
+As explained in the section \ref{subsec:interface}, some of these states refer to lower 
+level actions, which require the explicitation of the additional parameters by the human.
+An example is the state \textit{goToPosition}:
+
+\begin{verbatim}
+    state(goToPosition)
+    {
+      transition
+      {
+        if (theHumanCommand.commandBody != HumanCommand::CommandBody::GoToPosition)
+          goto start;
+      }
+      action
+      {
+        Pose2f pose = theLibMisc.glob2Rel(theHumanCommand.x, theHumanCommand.y);
+        theWalkToPointSkill(pose);
+        switchHeadCommands();
+      }
+    }
+
+\end{verbatim}
+
+which needs the field coordinates given by the operator (coach?) saved in the representation.
+On the contrary, other actions must be interpreted just as \suggestion{ADVICE} coming 
+from the coach. Here the agent has a certain degree of freedom, and must use 
+its knowledge to complete the action. An example is the state \textit{goToBallAndDribble}:
+
+\begin{verbatim}
+    state(goToBallAndDribble)
+    {
+      transition
+      {
+        if (theHumanCommand.commandBody != HumanCommand::CommandBody::GoToBallAndDribble)
+          goto start;
+      }
+
+      action
+      {
+        theGoToBallAndDribbleSkill(calcAngleToTarget(theLibStriker.strikerMovementPoint()));
+      }
+    }
+\end{verbatim}
+The called skill compute a free point in the field toward which the dribble must be executed,  
+brings the robot near the ball and complete the dribble.
+A special mention goes to the state \textit{pass}, which falls in the latter category of states.
+This one tells to the agent to execute a passage to its teammate in the field, thus the robot
+must have the position of the teammate in one of its mental model. 
+At the time when the robot has no teammate, an uncertain situation appears.
+We managed this circumstance redirecting to another action, applying a dribble instead of a passage.
 
 \begin{verbatim}
 state(pass)
@@ -598,22 +820,15 @@ state(pass)
 }
 \end{verbatim}
 
-<<<<<<< HEAD
-Whenever a new command is received, the robot answers with an audio feedback and
-reiterates over the command list. 
-=======
-
 
 
 \subsection{Speech-to-Text Module}
-
-\todo[inline]{Blablabla}
->>>>>>> parent of c296fda (stt)
+As a complementary feature of the interface, we integrate a Speech-to-Text module to enable voice 
+interaction with the robot. This integration enhances the communication between the coach and the robot, 
+making interactions faster and more efficient. In a dynamic environment like soccer, quick information 
+exchange is crucial, and voice commands streamline the process.
 
 \subsection{Interface}
-
-\subsection{Speech-to-Text Module}
-As a complementary feature of the interface, we integrate a Speech-to-Text module to enable voice interaction with the robot. This integration enhances the communication between the coach and the robot, making interactions faster and more efficient. In a dynamic environment like soccer, quick information exchange is crucial, and voice commands streamline the process.
 
 
 \section{Results}

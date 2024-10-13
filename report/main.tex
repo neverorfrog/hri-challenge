@@ -44,7 +44,7 @@
 % \usepackage[normalem]{ulem}
 % \useunder{\uline}{\ul}{}
 
-\title{Remote Interaction with a Nao Humanoid in competitive games \\ Elective in AI / HRI Report}
+\title{Interaction with a Nao Humanoid robot in competitive games \\ Elective in AI / HRI Report}
 \author{Flavio Maiorana \and Valerio Spagnoli \and Flavio Volpi}
 \date{\today}
 
@@ -95,20 +95,20 @@ To do this, a form of bidirectional interaction between the human operator and t
 
 \subsubsection{Bidirectional Communication}  
 Receiving instructions from a coach can significantly impact the outcome of a soccer match. 
-Likewise, getting feedback from the robot when issuing commands greatly enhances 
-the quality of the interaction. The human acting as a coach must be completely aware of the robot's surroundings,
+Likewise, getting feedbacks from the robot when issuing commands greatly enhances 
+the quality of the interaction. The human, acting as a coach, must be completely aware of the robot's surroundings,
 while the robot must be able to interpret the human's commands and respond accordingly. 
 \begin{itemize}  
     \item \textbf{Robot-to-Human Communication}: The robot provides the human operator with 
     all the necessary information to reconstruct the world model. These data are transmitted 
     over the network to the operator's computer, where are filtered and displayed on the 
-    graphical interface. Moreover, the robot responds with vocal feedback to confirm received 
+    graphical interface. Moreover, the robot responds with vocal feedbacks to the confirm received 
     commands or to report any issues (e.g. the impossibility to execute the command).  
     \item \textbf{Human-to-Robot Communication}:  
     \begin{itemize}  
         \item \textbf{Coach-to-Robot Communication}: The human operator, acting as a coach, can 
         analyze the reconstructed world model using the graphical interface and decide to send commands to the robot. 
-        These commands are transmitted through the network or via voice commands.  
+        The latter are transmitted through the network or via voice commands.  
         \item \textbf{Referee-to-Robot Communication}: In the context of the RoboCup 
         SPL challenge, another human, acting as a referee, can send commands to the robot using 
         whistle signals. The robot must be capable of interpreting these signals and responding 
@@ -134,9 +134,10 @@ is critical to maintain the robot's responsiveness to human input and ensure acc
 \subsection{Summary of the results}
 \label{sec:summary}
 
-Our system achieved the objective of allowing a human operator to control a Nao
-by voice and using a graphical interface, and to receive feedback from the robot
+Our system achieved the goal of allowing a human operator to control a Nao
+by voice and using a graphical interface, and to receive feedbacks from the robot
 in response to the commands. The system integrates various features, such as:
+\todo[inline]{forse dire che il mental model del robot già esiste???}
 \begin{itemize}
     \item \textbf{communication}: which manages the communication between the robot and
     the human operator
@@ -144,8 +145,10 @@ in response to the commands. The system integrates various features, such as:
     accessing only the robot's perceptions
     \item \textbf{interaction}: by answering to the commands before executing
     them, considering also the feasibility of the execution itself,
-    \item \textbf{memory}: the past command is held in memory, in order to
-    resume it in case it is needed.
+    \item \textbf{memory}: the robot has a memory of some information about the 
+    environment, and about some events happened in the past.
+    \suggestion{the past command is held in memory, in order to
+    resume it in case it is needed}.
 \end{itemize}
 The system was tested in the RoboCup 2024 SPL challenge, where SPQR Team reached
 the third place, demonstrating the effectiveness of the system in a competitive
@@ -203,7 +206,7 @@ The system can be divided in three parts:
 
 \subsection{Framework backbone}
 \label{sec:framework}
-The framework on which everything stands on is the one of the SPQR team of Sapienza University \cite{},
+The framework on which everything stands on is the one of the SPQR team of Sapienza University \cite{spqr},
 which is derived from that one of the
 German team B-Human of the year 2021 \cite{bhuman2023}, University of Bremen. At low level, the robot is 
 controlled by four threads:
@@ -246,13 +249,19 @@ the right execution order of the modules according to cyclic dependencies betwee
 For example, if a module M1 updates the representation R1, and this representation is required from 
 module M2 to modify its representation, the module M2 cannot be executed before the module M1, so the
 scheduler will execute in order M1 and M2. 
-\todo[inline]{aggiungere immagine di due moduli che richiedono rappresentazioni}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{assets/modules.png}
+    \label{fig:modules}
+    \caption{Functioning of modules and representations}
+\end{figure}
+
 Every update function has an execution frequency of 83 Hz, which practically allows an information 
 refresh in real time.
 
 \subsubsection{Behaviors and Skills\&Card}
 Behaviors represent the real actions the robot will take during the game. They are modeled as finite 
-automata, according to CABSL standard ($C$-$based$ $Agent$ $Behavior$ $Specification$ $Language$) \cite{}.
+automata, according to CABSL standard ($C$-$based$ $Agent$ $Behavior$ $Specification$ $Language$) \cite{CABSL}.
 This is based on the concepts of options, states, transitions and actions: the options are finite-state machines that
 describe a determined way of acting; transitions define the conditions to move between two states of the graph; 
 when the latter arrives in a state, the specified actions are executed.
@@ -282,16 +291,14 @@ possible undesired behaviors.
 \end{figure}
 
 \subsubsection{Memory}
-\todo[inline]{Boh}
-\suggestion{
-    The robot's perception is not limited to the current state of the environment; 
-    it also utilizes past information to inform its decisions. The robot maintains 
-    a memory of past events and when they occurred. For instance, it can remember the 
-    last time it saw the ball or when it last encountered an obstacle. This historical 
-    data is crucial for the human operator to accurately reconstruct the world model 
-    and make informed decisions. Additionally, the robot can recall the last command 
-    it received and resume it if necessary.
-}
+\todo[inline]{TODO}
+The robot's perception is not limited to the current state of the environment; 
+it also utilizes past information to affect its decisions. The robot maintains 
+a memory of past events and when they occurred. For instance, it can remember the 
+last time it saw the ball or when it last encountered an obstacle. This historical 
+data is crucial for the human operator to accurately reconstruct the world model 
+and make efficient decisions. \suggestion{Additionally, the robot can recall the last command 
+it received and resume it if necessary.}
 
 \subsubsection{Social Reasoning}
 
@@ -301,7 +308,7 @@ could be considered as a form of social rules which the robots need to obey to
 while playing. Depending on the game state, some actions are not permitted. For
 instance, in SET the robots are not allowed to move. Similarly, one could impose
 a rule that avoids the robot to score in its own goal, even if it is requested
-to. Of course, in order to to some adequate social reasoning, it is necessary
+to. Of course, in order to do some adequate social reasoning, it is necessary
 for the robot to have a sufficiently detailed model of the game state and the
 field.
 
@@ -310,7 +317,7 @@ field.
 \todo[inline]{Come rappresenta il mondo il robot? Stato del gioco e del campo fisico}
 Every robot has two different mental models, and they represent the way the robot 
 describes the world: a local world model and a global world model.
-The former is reconstructed starting just from the preceptions the robot itself has,
+On the one hand, the first one is reconstructed starting just from the preceptions the robot itself has,
 so the generated mental model will be partial. Furthermore, the model is expressed 
 with respect to the robot itself.
 It contains:
@@ -323,11 +330,11 @@ It contains:
     \item self localization position in the field
 \end{itemize}
 
-The latter instead is reconstructed using the local world model and the information
-received from the teammates through the network. Because the local perceptions of the 
-single robot can be not so accurate, due to some additional noise that affects the sensors,
+On the other hand, the global world model is reconstructed using the local one and the information
+received from the teammates through the network. Since the local perceptions of the 
+single robot are not so accurate, due to some additional noise that could affect the sensors,
 some filters are applied to the single attributes that constitute the world model. This 
-is done to result in a more accurate probabilistic estimate of the values of those attributes.
+is done to achieve a more solid probabilistic estimate of the values of those attributes.
 It is composed by:
 \begin{itemize}
     \item global positions of the obstacles (teammates and opponents)
@@ -355,21 +362,26 @@ che le cose visualizzate nell'interfaccia si ottengono tramite questo}
 Python server is the bridge which links the robot and the graphical 
 interface. It is composed by two parallel processes in two opposite directions:
 \begin{itemize}
-    \item direction \textbf{robot-human}: server continuously listen in a specified port
-    messages from the agent about the world model; then it unpacks the information and send 
+    \item direction \textbf{robot-human}: the server continuously listens to a specified port, where
+    the messages from the agent about the world model come; then it unpacks the information and send 
     specific messages to the interface;
-    \item direction \textbf{human-robot}: server listens constantly messages that come from
-    the interface about the commands the human wants the robot execute, with any additional 
-    information; then the server wrap them in a precise struct, and send it to the robot. 
+    \item direction \textbf{human-robot}: the server listens constantly to messages that come from
+    the interface about the commands the human wants the robot to execute, with any additional 
+    information; then the server wraps them in a precise struct, and send it to the robot. 
      
 \end{itemize} 
 
 \subsection{Interface}
 \label{subsec:interface}
 We opted for a solution that prioritizes high-level commands and audio-visual
-feedback. The graphical interface is made by a bunch of buttons, that allow the
-human operator to send commands to the robot, and a 2D representation of the
-field that shows the robot's position and its reconstruction of the world.  
+feedbacks. As shown in figure \ref{fig:interface}, the graphical interface is made by a bunch of buttons,
+allowing the human operator to send commands to the robot, and a 2D representation of the
+field that shows the robot's position and its reconstruction of the world.
+Some of the buttons require the user to click a point in the represented field to
+send the action command with the point coordinates; in contrast, the others just send
+the high level action command to the robot, granting it to perform
+the action in the way it thinks is the best, according to its mental models.
+
 
 \begin{figure}[H]
     \centering

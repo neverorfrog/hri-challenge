@@ -137,18 +137,16 @@ is critical to maintain the robot's responsiveness to human input and ensure acc
 Our system achieved the goal of allowing a human operator to control a Nao
 by voice and using a graphical interface, and to receive feedbacks from the robot
 in response to the commands. The system integrates various features, such as:
-\todo[inline]{forse dire che il mental model del robot già esiste???}
 \begin{itemize}
     \item \textbf{communication}: which manages the communication between the robot and
-    the human operator
-    \item \textbf{mental model}: responsible for representing the field by
-    accessing only the robot's perceptions
+    the human operator;
+    \item \textbf{mental model}: responsible for the robot to maintain a model of 
+    the environment, and for the operator to dispaly a simplified representation by
+    accessing only the robot's perceptions;
     \item \textbf{interaction}: by answering to the commands before executing
     them, considering also the feasibility of the execution itself,
     \item \textbf{memory}: the robot has a memory of some information about the 
     environment, and about some events happened in the past.
-    \suggestion{the past command is held in memory, in order to
-    resume it in case it is needed}.
 \end{itemize}
 The system was tested in the RoboCup 2024 SPL challenge, where SPQR Team reached
 the third place, demonstrating the effectiveness of the system in a competitive
@@ -376,7 +374,7 @@ interface. It is composed by two parallel processes in two opposite directions:
 We opted for a solution that prioritizes high-level commands and audio-visual
 feedbacks. As shown in figure \ref{fig:interface}, the graphical interface is made by a bunch of buttons,
 allowing the human operator to send commands to the robot, and a 2D representation of the
-field that shows the robot's position and its reconstruction of the world.
+field that shows the robot's position and its reconstruction of the world (figure \ref{fig:simrobot}).
 Some of the buttons require the user to click a point in the represented field to
 send the action command with the point coordinates; in contrast, the others just send
 the high level action command to the robot, granting it to perform
@@ -394,8 +392,18 @@ the action in the way it thinks is the best, according to its mental models.
     \centering
     \includegraphics[width=0.9\linewidth]{assets/simrobot.png}
     \caption{The Corresponding Field Configuration}
-    \label{fig:nao}
+    \label{fig:simrobot}
 \end{figure}
+
+\subsection{Vocal communication}
+As a complementary way of communication, we integrate a Speech-to-Text module to enable voice 
+interaction with the robot. This integration makes the interaction between the coach and the robot
+more realistic and more similar to the one coach-player in the real football matches. 
+The supported commands for the vocal control are the highest-level ones, so all the commands
+expressed on the interface which do not require a point coordinates on the field.
+This design choice is due to the hardness of expressing additional information in a right way
+using vocal instructions.
+
 
 \newpage
 \section{Implementation}
@@ -403,10 +411,10 @@ the action in the way it thinks is the best, according to its mental models.
 
 From an implementative point of view, the system can be divided in four modules: 
 \begin{itemize}
-    \item \textbf{Communication Layer}: exchanges messages between the robot and the human operator
-    \item \textbf{Framework}: the backbone of the system, which runs on the robot
-    \item \textbf{GUI}: the graphical interface that allows the human operator to interact with the robot
-    \item \textbf{Speech-to-Text Module}: the module that converts the human operator's voice commands to text
+    \item \textbf{Communication Layer}: exchanges messages between the robot and the human operator;
+    \item \textbf{Framework}: the backbone of the system, which runs on the robot;
+    \item \textbf{GUI}: the graphical interface that allows the human operator to interact with the robot;
+    \item \textbf{Speech-to-Text Module}: the module that converts the human operator's voice commands to text;
 \end{itemize}
 
 These modules are wrapped around the two main data structs that encapsulate the
@@ -424,7 +432,7 @@ operator to the robot. It has the following structure:
 Basically, it is formatted as a tuple of 5 elements, where the first three are
 Bytes and the last two are floats. The last two elements are the coordinates of
 the target position, which are indicated on the 2D field. This precise structure
-is needed to be able to send the command through the socket and parse it on the
+is needed to be able to send commands through the socket and parse it on the
 C++ side.
 
 The \textit{DebugInfo} struct, on the other hand, is used to send feedback from
@@ -464,18 +472,18 @@ representation of the robot's mental model of the field.
 
 The most important fields are:
 \begin{itemize}
-    \item \code{fallen}: a boolean that indicates if the robot is fallen,
-    \item \code{pos\_x, pos\_y, theta}: the position of the robot in the field,
-    \item \code{ball\_age}: the age of the ball that indicates how many cycles have passed since the robot saw the ball,
-    \item \code{ball\_pos\_x, ball\_pos\_y}: the position of the ball in the field,
-    \item \code{obstacle\_types}: an array that indicates the type of the obstacles in the field (e.g. teammate, opponent),
-    \item \code{obs\_center\_x, obs\_center\_y}: the position of the obstacles in the field,
-    \item \code{obs\_last\_seen}: the time when the obstacles were last seen,
-    \item \code{secs\_remaining}: the time remaining in the game,
-    \item \code{arm\_contact}: a boolean that indicates if the robot is in contact with an obstacle,
-    \item \code{arm\_push\_direction}: the direction in which the robot arm is pushed,
-    \item \code{arm\_time\_of\_last\_contact}: the time when the robot was last in contact with an obstacle,
-    \item \code{teamball, teamballvel}: the position and velocity of the ball in the field.
+    \item \code{fallen}: a boolean that indicates if the robot is fallen;
+    \item \code{pos\_x, pos\_y, theta}: the position of the robot in the field;
+    \item \code{ball\_age}: the age of the ball that indicates how many cycles have passed since the robot saw the ball;
+    \item \code{ball\_pos\_x, ball\_pos\_y}: the position of the ball in the field;
+    \item \code{obstacle\_types}: an array that indicates the type of the obstacles in the field (e.g. teammate, opponent);
+    \item \code{obs\_center\_x, obs\_center\_y}: the position of the obstacles in the field;
+    \item \code{obs\_last\_seen}: the time when the obstacles were last seen;
+    \item \code{secs\_remaining}: the time remaining in the game;
+    \item \code{arm\_contact}: a boolean that indicates if the robot is in contact with an obstacle;
+    \item \code{arm\_push\_direction}: the direction in which the robot arm is pushed;
+    \item \code{arm\_time\_of\_last\_contact}: the time when the robot was last in contact with an obstacle;
+    \item \code{teamball, teamballvel}: the position and velocity of the ball in the field;
 \end{itemize}
 Using these informations, the human operator can have a detailed view of the field through the robot's perceptions.
 
@@ -486,21 +494,21 @@ robot and the human operator, in both directions.
 It is written in Python and based on UDP sockets. 
 
 \subsubsection{Human-to-Robot communication}
-The server listens to a port for a message from the graphical interface. Each unpacked message contains
+The server listens to a port for a message from the user. Each unpacked message contains
 the command in the form of a string, with any additional useful information for the execution of the instructions.
 The receiving function from the GUI is the following:
-\todo[inline]{cambia codice di receive}
 \begin{verbatim}
-def receive_command_from_js(self) -> tuple[int, int, int, int]:
+def receive_command(self) -> tuple[int, int, int, int]:
     try:
         data, addr = self.server_socket.recvfrom(1024)
     except Exception as e:
         print(f"Error in receiving the message: {e}")
     try:
         message = data.decode()
+        print("message:     ", message)
     except UnicodeDecodeError:
-        print(f"Received non-UTF-8 message from \
-        JavaScript: {data} from {addr}")
+        print(f"Received non-UTF-8 message from JavaScript: \
+        {data} from {addr}")
     message_split = message.split('|')[1]
     content_message = message_split.split(',')
     task_type = content_message[2]
@@ -548,11 +556,10 @@ def send_command_to_cpp(self, command: int, strategy: int, x: int, y: int):
 \end{verbatim}
 
 \subsubsection{Robot-to-Human communication}
-\todo[inline]{to check}
 This thread makes the server listening to a different port for messages from the 
 robot. As explained before, these messages contain world modeling data in
 a packed way, and encorporate a lot of infos expressed above in the $DebugInfo$ struct.
-The function that is responsible for receiving messages from the robot is the following:
+The function responsible for receiving messages from the robot is the following:
 \begin{verbatim}
     def receive_from_cpp(self) -> struct:
         debug_packet = None
@@ -568,7 +575,7 @@ The function that is responsible for receiving messages from the robot is the fo
 \end{verbatim}
 
 Then the server has to unwrap the debug packet and it is going to select just some of these information
-to send to the graphcal interface. In particular, it will communicate the infos about the 
+to send to the graphcal interface. In particular, it will choose the infos about the 
 local mental model (see section \ref{subsec:mental_model}). It is done through these functions:
 
 \begin{verbatim}
@@ -619,21 +626,15 @@ local mental model (see section \ref{subsec:mental_model}). It is done through t
             (self.config.local_ip, self.config.debug_send_port))
 \end{verbatim}
 
-
-
-
-
-
 \subsection{Framework}
-\todo[inline]{to finish}
 As it was previously said, the SPQR-Team framework is the backbone of the project and its
 operational mechanism was explained in the section \ref{sec:framework}.
 The two mental models are already available in the framework, which allow the robot to
-maintain a representation of the world where he plays, \suggestion{permitting him to act according to
-his needs, and helping us to give the right instructions to him.} 
+maintain a representation of the world where he plays, permitting him to act according to
+his needs, and helping us to give the right instructions to him. 
 
 What we added inside the framework (to make it work with the rest of the infrastructure) 
-regard two aspects of the robot: the communication with the interface to send information
+regards two aspects of the robot: the communication with the interface to send information
 and receive human commands, and the behaviors the robot must have during the games, according
 to own believes about the environment and to received human instructions.
 
@@ -690,8 +691,10 @@ void CommandReceiver::update(HumanCommand& command) {
 }
 \end{verbatim}
 
-The \textit{DebugMessageHandler} is responsible to update \dots
-\todo[inline]{to complete, non so che scrivere}
+The \textit{DebugMessageHandler} is responsible to update the representation \textit{DebugMessageOutputGenerator},
+which wraps all necessary information in the \textit{DebugInfo} struct before it is sent through
+the network. The implementation 
+of the functions is omitted because too long, it can be seen in the official framework release \cite{spqr}. 
 
 
 \subsubsection{Designed behavior}
@@ -702,7 +705,7 @@ representation in effective actions to execute. Due to the syntax of the CABSL s
 and to our necessities, we implemented the card to manage more clearly the body actions,
 while implementing an auxiliar function (named \textit{switchHeadCommands}) to handle concurrently the head actions.
 The body instructions are guided by a switch command, which directs the agent to the 
-right state of the state-machine.
+right state of the states-machine.
 Here we show the root of the graph, whence all states branch off:
 
 \begin{verbatim}
@@ -761,12 +764,14 @@ An example is the state \textit{goToPosition}:
     {
       transition
       {
-        if (theHumanCommand.commandBody != HumanCommand::CommandBody::GoToPosition)
+        if (theHumanCommand.commandBody != 
+            HumanCommand::CommandBody::GoToPosition)
           goto start;
       }
       action
       {
-        Pose2f pose = theLibMisc.glob2Rel(theHumanCommand.x, theHumanCommand.y);
+        Pose2f pose = theLibMisc.glob2Rel(theHumanCommand.x, 
+                                          theHumanCommand.y);
         theWalkToPointSkill(pose);
         switchHeadCommands();
       }
@@ -774,9 +779,9 @@ An example is the state \textit{goToPosition}:
 
 \end{verbatim}
 
-which needs the field coordinates given by the operator (coach?) saved in the representation.
-On the contrary, other actions must be interpreted just as \suggestion{ADVICE} coming 
-from the coach. Here the agent has a certain degree of freedom, and must use 
+which needs the field coordinates given by the operator saved in the representation.
+On the contrary, other actions must be interpreted just as guidances coming 
+from the coach. Here, the agent has a certain degree of freedom, and must use 
 its knowledge to complete the action. An example is the state \textit{goToBallAndDribble}:
 
 \begin{verbatim}
@@ -784,18 +789,21 @@ its knowledge to complete the action. An example is the state \textit{goToBallAn
     {
       transition
       {
-        if (theHumanCommand.commandBody != HumanCommand::CommandBody::GoToBallAndDribble)
+        if (theHumanCommand.commandBody != 
+            HumanCommand::CommandBody::GoToBallAndDribble)
           goto start;
       }
 
       action
       {
-        theGoToBallAndDribbleSkill(calcAngleToTarget(theLibStriker.strikerMovementPoint()));
+        theGoToBallAndDribbleSkill( \
+            calcAngleToTarget(theLibStriker.strikerMovementPoint()));
       }
     }
 \end{verbatim}
-The called skill compute a free point in the field toward which the dribble must be executed,  
-brings the robot near the ball and complete the dribble.
+The called skill computes a free point in the field toward which the dribble must be executed,
+brings the robot near the ball and complete the dribble. The agent uses its mental models to avoid
+opponents and obstacles in the field.
 A special mention goes to the state \textit{pass}, which falls in the latter category of states.
 This one tells to the agent to execute a passage to its teammate in the field, thus the robot
 must have the position of the teammate in one of its mental model. 
@@ -813,34 +821,30 @@ state(pass)
 
     action
     {
-    int num = theTeamData.numberOfActiveTeammates;
-    int size = theTeamData.teammates.size();
-    if(num > 0){
-        theSaySkill("Pass the ball");
-        Vector2f target = theTeamData.teammates[0].theRobotPose.translation;
-        KickInfo::KickType kickType = theLibPass.getKickType(target);
-        float distance = theLibMisc.distance(target, theRobotPose);
-        theGoToBallAndKickSkill(calcAngleToTarget(target), 
-            kickType, true, distance);
-    }
-    else{
-        theSaySkill("Go to ball and dribble");
-        theGoToBallAndDribbleSkill(calcAngleToTarget(
-            theLibStriker.strikerMovementPoint()));
-    }
+        int num = theTeamData.numberOfActiveTeammates;
+        int size = theTeamData.teammates.size();
+        if(num > 0){
+            theSaySkill("Pass the ball");
+            Vector2f target = theTeamData.teammates[0].theRobotPose.translation;
+            KickInfo::KickType kickType = theLibPass.getKickType(target);
+            float distance = theLibMisc.distance(target, theRobotPose);
+            theGoToBallAndKickSkill(calcAngleToTarget(target), 
+                kickType, true, distance);
+        }
+        else{
+            theSaySkill("Go to ball and dribble");
+            theGoToBallAndDribbleSkill(calcAngleToTarget(
+                theLibStriker.strikerMovementPoint()));
+        }
     }
 }
 \end{verbatim}
 
 
-
-\subsection{Speech-to-Text Module}
-As a complementary feature of the interface, we integrate a Speech-to-Text module to enable voice 
-interaction with the robot. This integration enhances the communication between the coach and the robot, 
-making interactions faster and more efficient. In a dynamic environment like soccer, quick information 
-exchange is crucial, and voice commands streamline the process.
-
-\subsection{Interface}
+\subsection{Speech-to-Text module}
+The module for audio capture is \texttt{sounddevice}, 
+while the used pre-trained model for automatic speech recognition belongs 
+to the toolkit \textbf{Vosk}.
 
 
 \section{Results}
@@ -861,7 +865,15 @@ across various aspects:
 
 The graphical interface was designed to be user-friendly and intuitive, ensuring that 
 the human operator can interact with the robot quickly, which is essential in the 
-competitive RoboCup SPL challenge, where each match lasts only 3 minutes.  
+competitive RoboCup SPL challenge, where each match lasts only 3 minutes. 
+
+On the contrary, the reliability of the interaction through the speech-to-text module 
+is not so much high. The audio capturing achieves 
+good performance in sampling time and makes it adaptable in a real scenario.
+Instead, the automatic speech recognition pre-trained model has not an high accuracy,
+sometimes it confuses some words, especially when the true
+and the predicted ones are comparable. Thus it is necessary to repeat the command more than once.
+This implies a difficult usage in real scenarios.
 
 \subsection{Adversarial Environment - RoboCup 2024 SPL Challenge}  
 The system was tested in the highly competitive and adversarial setting of the RoboCup 

@@ -36,7 +36,6 @@ class CommandSender(SocketThread):
         
         # CODE TO MANAGE MESSAGES ON THE SAME PORT
         while not self.stop_threads.is_set():
-            print("OK")
             command_number, strategy_number, x_position, y_position = self.receive_command()
             self.send_command_to_cpp(command_number, strategy_number, x_position, y_position)
     

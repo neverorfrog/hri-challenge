@@ -461,6 +461,8 @@ function drawObjects(canvas)
     //Draw the active robots
     for( const [robotNumber, robotPosition] of Object.entries(robotNumbersToPositions)) 
     {
+        if(robotPosition[1] == 0 && robotPosition[2] == 0) continue; // Skip if the robot is not active
+
         drawRobot(
             ctx, 
             robotNumber, 
